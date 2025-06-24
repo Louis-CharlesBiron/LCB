@@ -1,0 +1,150 @@
+:root {
+    --c1: #0D1B2A; /* Darker */
+    --c2: #1B263B; /* Dark */
+    --c3: #415A77; /* Accent */
+    --c4: #778DA9; /* Light accent */
+    --c5: #E0E1DD; /* Text */
+}
+
+html, body {
+    background-color: var(--c1);
+    font-family: monospace;
+    color: var(--c5);
+    margin: 0;
+    font-size: 14px;
+    letter-spacing: 2px;
+    width:  100%;
+    height: calc(100%+0px);
+    overflow: visible;
+    overflow-x: hidden;
+}
+
+button {cursor: pointer}
+
+* {
+    font-family: inherit;
+    outline: none;
+}
+
+::selection {background-color: rgba(56, 56, 56, 0.25)}
+
+*::-webkit-scrollbar {width: 8px;}
+*::-webkit-scrollbar-track {background: var(--c2);}
+*::-webkit-scrollbar-thumb {background: var(--c2);border-right: 2px solid var(--c3);border-radius: 10px;}
+*::-webkit-scrollbar-thumb:hover {background-color: var(--c3);}
+
+input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {-webkit-appearance: none; margin: 0;}input[type="number"] {-moz-appearance: textfield;}
+input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type="password"]::-webkit-credentials-auto-fill-button,input[type="password"]::-webkit-password-reveal-button {display:none !important;}
+
+/**/
+
+.main {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+
+
+.navbar {
+    width: 100%;
+    height: 65px;
+    position: fixed;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    background-color: var(--c2);
+    border-bottom: 10px double var(--c1);
+    outline: 3px solid var(--c2);
+    box-shadow: 0px 4px 13px 0px var(--c1);
+    z-index: 1293810298309123;
+}
+
+.content {
+    width: 100%;
+    height: 100%;
+    padding-top: 40px;
+    background-color: var(--c1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+
+
+.section {
+    height: 72vh; /*500px;*/
+    margin-top: 100px;
+    padding: 16px;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-size: 12em;
+    text-shadow: 7px 5px var(--c4);
+    user-select: none;
+    outline: 5px solid var(--c2);
+    padding-bottom: 20px;
+    text-align: center;
+}
+
+.info {
+    width: 82.5%;
+    background-color: var(--c3);
+    border-radius: 10px;
+    border: 5px solid var(--c1);
+    outline: 4px solid var(--c3);
+}
+
+.wall {
+    width: 96%;
+    background-color: var(--c5);
+    border-top: 5px solid    var(--c1);
+    border-bottom: 5px solid var(--c1);
+    outline: 15px solid var(--c5) !important;
+    color: #1B263B;
+    font-size: 22px;
+    padding: 0% 2%;
+    font-weight: bold;
+}
+
+.coolInfo {
+    width: 90%;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+}
+
+.coolInfo > div{
+    background-color: var(--c3);
+    border-radius: 10px;
+    border: 5px solid var(--c1);
+    outline: 4px solid var(--c3);
+}
+
+.ci_small {
+    width: 22%;
+}
+.ci_medium {
+    width: 48%;
+}
+.ci_large {
+    width: 72%;
+}
+
+
+
+.smallText {
+    font-size: 16px !important;
+    font-weight: bold;
+    text-shadow: 2px 1px var(--c4);
+}
