@@ -1,5 +1,5 @@
 
-const _=null, {Canvas, Shape, Dot, CDEUtils, CanvasUtils, Render} = CDE, random = CDEUtils.random
+const _=null, {Canvas, Shape, Dot, CDEUtils, CanvasUtils, Render, _Obj, TextDisplay, ImageDisplay, Pattern, Gradient} = CDE, random = CDEUtils.random
 
 const CVS1 = new Canvas(document.getElementById("cvs1")), render1 = CVS1.render
 
