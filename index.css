@@ -78,7 +78,8 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type=
 
 
 .section {
-    height: 72vh;
+    /* height: 72vh; */
+    height: 500px;
     margin-top: 100px;
     padding: 16px;
 }
@@ -111,10 +112,24 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type=
     border-top: 5px solid    var(--c1);
     border-bottom: 5px solid var(--c1);
     outline: 15px solid var(--c5) !important;
-    color: #1B263B;
+    color: var(--c1);
     font-size: 22px;
     padding: 0% 2%;
     font-weight: bold;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 360px;
+}
+
+.wall_textContent {
+    width: 100%;
+    height: 75%;
+    white-space: break-spaces;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .miniwall {
@@ -152,6 +167,7 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type=
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+    overflow: hidden;
 }
 
 .ci_small {
@@ -183,7 +199,7 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type=
     width: 90%;
     text-align: justify;
     color: var(--c5);
-    font-size: 1.1em;
+    font-size: 1.2em;
 }
 
 .ci_content {
@@ -226,6 +242,7 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type=
     font-size: 16px !important;
     font-weight: bold;
     text-shadow: 2px 1px var(--c4);
+    margin-top: 16px;
 }
 
 .aloneText {
@@ -249,6 +266,31 @@ iframe {
 
 a {
     font-size: 1.3em;
-    color: var(--c4);
-    text-shadow: 1px 1px var(--c2);
+    color: var(--c5);
+    text-shadow: 1.5px 1.5px 3px var(--c2);
+}
+
+c {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.textImg {
+    white-space: pre;
+    letter-spacing: -1px;
+    line-height: 12px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.image {
+    width: 100%;
+}
+
+.wide {
+    width: 130%;
+}
+
+.cover {
+    background-size: cover;
 }
