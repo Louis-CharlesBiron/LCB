@@ -16,19 +16,18 @@ function getBorderPaths() {
     }
 }
 
+// TODO FIX WHEN UPDATING CDE
 const loop1Obj = CVS1.get(CanvasUtils.createEmptyObj(CVS1, (obj)=>{
-    setInterval(()=>{
-        obj.setupResults = getBorderPaths()
-    }, 350)
+    setInterval(()=>obj.setupResults = getBorderPaths(), 350)
 
     return getBorderPaths()
 }, (obj)=>{
     const r = obj.setupResults
 
-    render1.batchStroke(r.path2, render1.profile2.update([255,0,0,1], _, _, _, 6))
-    render1.batchStroke(r.path1, render1.profile1.update([0,0,0,1], _, _, _,   6))
-    render1.batchStroke(r.path4, render1.profile2.update([255,0,0,1], _, _, _, 6))
-    render1.batchStroke(r.path3, render1.profile1.update([0,0,0,1], _, _, _,   6))
+    render1.batchStroke(r.path2, render1.profile2.update([255,0,0,1], _, _, _, 5))
+    render1.batchStroke(r.path1, render1.profile1.update([0,0,0,1], _, _, _,   5))
+    render1.batchStroke(r.path4, render1.profile2.update([255,0,0,1], _, _, _, 5))
+    render1.batchStroke(r.path3, render1.profile1.update([0,0,0,1], _, _, _,   5))
 }))
 
 
