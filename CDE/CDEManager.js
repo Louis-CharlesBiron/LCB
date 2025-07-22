@@ -16,9 +16,8 @@ function getBorderPaths() {
     }
 }
 
-// TODO FIX WHEN UPDATING CDE
 const loop1Obj = CVS1.get(CanvasUtils.createEmptyObj(CVS1, (obj)=>{
-    setInterval(()=>obj.setupResults = getBorderPaths(), 350)
+    setInterval(()=>obj.setupResults = getBorderPaths(), 1000)
 
     return getBorderPaths()
 }, (obj)=>{
