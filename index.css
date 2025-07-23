@@ -327,3 +327,22 @@ footer {
 .anchored {
     scroll-margin-top: 100px;
 }
+
+.aboutFlex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.aboutSection {
+    display: flex;
+    flex-direction: column;
+    width: 46%;
+    white-space: nowrap;
+    text-align: start;
+}
+
+p {
+    text-align: center;
+    white-space: normal;
+}

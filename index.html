@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="img/logo.png" type="image/x-icon">
-    <title>Welcome to LCB town!</title>
+    <title>LCB - Accueil</title>
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
@@ -19,21 +19,29 @@
 
         <div class="content">
             <div class="header section">
-                Hey man!
+                Hey there!
                 <span class="smallText">Welcome to my stuff</span>
             </div>
 
             <div class="wall section anchored" id="about" style="user-select: none;">
                 <canvas id="cvs1"></canvas>
-                <div class="wall_textContent">
-        <h2 style="margin-bottom: 0;">About me:</h2>
-        <div>
-        - I like coding!
-        - I like bouldering / calisthenics!
-        - I like Geometry Dash!
-        - I like working on projects about stuff I like!
-        - I like to make stuff myself!
-        </div>
+                <div class="wall_textContent" style="justify-content: space-evenly">
+                    <h2 style="margin: 0;">About me:</h2>
+                    <div class="aboutFlex">
+                        <div class="aboutSection">
+                            <p>
+                                Hey! I'm a <span id="ageEl">2000</span> years old developer that specializes in Javascript! I recenlty comlpeted a 3 year computer science DEC at CEGEP Limoilou and, as of september 2025, I am studying for a bachelor's degree in the same domain at Laval University
+                            </p>
+                        </div>
+                        <div class="aboutSection">
+                            <span>- I like coding!</span>
+                            <span>- I like bouldering / calisthenics!</span>
+                            <span>- I like Geometry Dash / art!</span>
+                            <span>- I like working on projects on stuff I like!</span>
+                            <span>- I like to make stuff myself!</span>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -133,13 +141,13 @@
                         - have like a flower crown/border around the section
                     -->
                     <div class="ci_textContent">
-                        <i>In Stasis</i>, is a passion project I started back in October of 2024 and been working on it mostly on a daily basis.
+                        <i>In Stasis</i>, is a passion project I started back in October of 2024 and I've been working on it mostly on a daily basis.
                         <br><br>
-                        It is aimed to be a 7 minutes level in Geometry Dash, using the amazing song, <a href="https://www.newgrounds.com/audio/listen/1209616" style="font-size: 15.5px;" target="_blank">Recycle Zero</a>, by my favorite artist, <a href="https://cacola.newgrounds.com/" style="font-size: 15.5px;" target="_blank">Cacola</a>. 
+                        It is aimed to be a 7 minutes level in Geometry Dash, using the amazing song <a href="https://www.newgrounds.com/audio/listen/1209616" style="font-size: 15.5px;" target="_blank">Recycle Zero</a>, by my favorite artist, <a href="https://cacola.newgrounds.com/" style="font-size: 15.5px;" target="_blank">Cacola</a>. 
                         <br><br>
                         Being able to express my visual and emotionnal representation of this song, to create this personnal experience that will culminate into one the the happiest and proudest moment of my life upon verification, will always make me unfathomably proud.
                         <br><br>
-                        After months, I am still working on this project, which will be ready for verification in late 2025, and published somewhere in 2026!
+                        After months and countless hours, I still work pretty much everyday on this project. It should hopefully be ready for verification in late 2025, and published somewhere in 2026!
                         <br><br>
                         I really poured my heart into this art project and I love how it is turning out. The end of this project will truly mark the end of a chapter in my life.
                     </div>
@@ -215,6 +223,7 @@
 
     </div>
     <script src="canvasDotEffect.min.js"></script>
+    <script src="utils.js" async></script>
     <script src="CDE/CDEManager.js" async></script>
     <script src="CDE/preview.js" async></script>
     <script src="index.js" async></script>
