@@ -30,7 +30,7 @@
                     <div class="aboutFlex">
                         <div class="aboutSection">
                             <p>
-                                Hey! I'm a <span id="ageEl">2000</span> years old developer that specializes in Javascript! I recenlty comlpeted a 3 year computer science DEC at CEGEP Limoilou and, as of september 2025, I am studying for a bachelor's degree in the same domain at Laval University
+                                Hey! I'm a <span id="ageEl">2000</span> years old developer that specializes in Javascript! I recenlty comlpeted a 3 year computer science DEC at CEGEP Limoilou and, as of september 2025, I am studying for a bachelor's degree in the same domain at Laval University.
                             </p>
                         </div>
                         <div class="aboutSection">
@@ -70,10 +70,10 @@
                     </div>
 
                 </div>
-                <div class="ci_large">
+                <div class="ci_large" style="user-select: none;">
                     <h2 class="ci_header">CanvasDotEffect (cdejs)</h2>
                     <div class="ci_textContent">
-                        CanvasDotEffect is a lightweight, fully native, JS library that helps create customizable and interactive dot-based effects using the Canvas API
+                        CanvasDotEffect is a lightweight, fully native, JS library that helps create customizable and interactive dot-based effects using the Canvas API:
                     </div>
                     <canvas id="cdePreview"></canvas>
                 </div>
@@ -172,19 +172,19 @@
 
             <div class="coolInfo section" style="justify-content: space-around;">
                 <div class="ci_medium">
-                    <iframe src="https://www.youtube.com/embed/qHX6_jSrnrU" loading="lazy" frameborder="0" title="Cool Video of Sonic Wave" allow="autoplay; encrypted-media; picture-in-picture;"></iframe>
+                    <iframe src="https://www.youtube.com/embed/qHX6_jSrnrU" loading="lazy" frameborder="0" title="Cool Video of Sonic Wave" allow="autoplay; picture-in-picture;"></iframe>
                 </div>
                 <div class="ci_medium">
-                    <iframe src="https://www.youtube.com/embed/HhgFm9qM7kM?si=ZZjBuERQqUae7N4K" title="Cool Preview Of In Stasis" allow="autoplay; clipboard-write; encrypted-media picture-in-picture; web-share"></iframe>
+                    <iframe src="https://www.youtube.com/embed/HhgFm9qM7kM?si=ZZjBuERQqUae7N4K" title="Cool Preview Of In Stasis" allow="autoplay; clipboard-write; picture-in-picture; web-share"></iframe>
                 </div>
             </div>
 
             <div class="coolInfo section" style="justify-content: space-around;">
                 <div class="ci_medium">
-                    <iframe src="https://www.youtube.com/embed/EeVw_EElkII?si=B1QjlEZjJhE4pInX" loading="lazy" frameborder="0" title="Cool video of a v6 I did :)" allow="autoplay; encrypted-media; picture-in-picture;"></iframe>
+                    <iframe src="https://www.youtube.com/embed/EeVw_EElkII?si=B1QjlEZjJhE4pInX" loading="lazy" frameborder="0" title="Cool video of a v6 I did :)" allow="autoplay; picture-in-picture;"></iframe>
                 </div>
                 <div class="ci_medium">
-                    <iframe src="https://www.youtube.com/embed/w8tYnRjkfOg" loading="lazy" frameborder="0" title="Cool Video of Sink" class="ld_img" allow="autoplay; encrypted-media; picture-in-picture;"></iframe>
+                    <iframe src="https://www.youtube.com/embed/w8tYnRjkfOg" loading="lazy" frameborder="0" title="Cool Video of Sink" class="ld_img" allow="autoplay; picture-in-picture;"></iframe>
                 </div>
             </div>
 
@@ -222,10 +222,14 @@
         </div>
 
     </div>
-    <script src="canvasDotEffect.min.js"></script>
+    <script src="canvasDotEffect.js"></script>
     <script src="utils.js" async></script>
-    <script src="CDE/CDEManager.js" async></script>
-    <script src="CDE/preview.js" async></script>
     <script src="index.js" async></script>
+
+    <script src="CDE/CDEManager.js" async></script>
+    <script src="CDE/preview/PREVIEW.js" async></script>
+    <script src="CDE/preview/ex1.js" async></script>
+    <script src="CDE/preview/ex2.js" async></script>
+    <script src="CDE/preview/ex3.js" async></script>
 </body>
 </html>

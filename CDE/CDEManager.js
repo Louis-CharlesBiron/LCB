@@ -1,7 +1,7 @@
 
-const _=null, {Canvas, Shape, Dot, CDEUtils, CanvasUtils, Render, _Obj, TextDisplay, ImageDisplay, Pattern, Gradient} = CDE, random = CDEUtils.random
+const _=null//, {Canvas, Shape, Dot, CDEUtils, CanvasUtils, Render, _Obj, TextDisplay, ImageDisplay, Pattern, Gradient, Color, FilledShape, Grid, Mouse} = CDE
 
-const CVS1 = new Canvas(document.getElementById("cvs1")), render1 = CVS1.render
+const CVS1 = new Canvas(document.getElementById("cvs1")), render1 = CVS1.render, random = CDEUtils.random
 
 
 
@@ -16,10 +16,10 @@ function getBorderPaths() {
     }
 }
 
-const loop1Obj = CVS1.get(CanvasUtils.createEmptyObj(CVS1, (obj)=>{
+const loop1Obj = CanvasUtils.createEmptyObj(CVS1, (obj)=>{
     setInterval(()=>{
         if (!CVS1.mouse.valid) obj.setupResults = getBorderPaths()
-    }, 1050)
+    }, 1000)
 
     return getBorderPaths()
 }, (obj)=>{
@@ -29,7 +29,7 @@ const loop1Obj = CVS1.get(CanvasUtils.createEmptyObj(CVS1, (obj)=>{
     render1.batchStroke(r.path1, render1.profile1.update([0,0,0,1], _, _, _,   5))
     render1.batchStroke(r.path4, render1.profile2.update([255,0,0,1], _, _, _, 5))
     render1.batchStroke(r.path3, render1.profile1.update([0,0,0,1], _, _, _,   5))
-}))
+})
 
 
 
