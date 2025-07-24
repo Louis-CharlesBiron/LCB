@@ -1,4 +1,6 @@
-const CVS_cdePreview = new Canvas(document.getElementById("cdePreview"))
+const fpsCounter = new FPSCounter(), title = document.querySelector("title"), CVS_cdePreview = new Canvas(document.getElementById("cdePreview"), ()=>{
+    title.textContent = fpsCounter.getFps()+" fps"
+})
 
 
 

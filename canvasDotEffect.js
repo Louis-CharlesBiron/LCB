@@ -33,11 +33,12 @@ class CDEUtils {
     /**
      * Returns a random number within the min and max range
      * @param {Number} min: the minimal possible value (included)
-     * @param {Number} max: the maximal possible value (excluded)
+     * @param {Number} max: the maximal possible value (included)
      * @param {Number?} decimals: the decimal point. (Defaults to integers)
      * @returns the generated number
      */
     static random(min, max, decimals=0) {
+        max++
         if (decimals) {
             const precision = decimals**10
             return Math.round((Math.random()*(max-min)+min)*precision)/precision
@@ -398,10 +399,10 @@ class CanvasUtils {
 
     // DEBUG // Create dots at provided intersection points
     static showIntersectionPoints(canvas, res) {
-        const s_d1 = new Dot(res.source.inner, 3, [255,0,0,1]),
-            s_d2 = new Dot(res.source.outer, 3, [255,0,0,0.45]),
-            t_d1 = new Dot(res.target.outer, 3, [255,0,0,0.45]),
-            t_d2 = new Dot(res.target.inner, 3, [255,0,0,1])
+        const s_d1 = new Dot(res[0][0], 3, [255,0,0,.45]),
+            s_d2 = new Dot(res[0][1], 3, [0,0,255,0.45]),
+            t_d1 = new Dot(res[1][1], 3, [0,0,255,0.45]),
+            t_d2 = new Dot(res[1][0], 3, [255,0,0,.45])
         
         canvas.add(s_d1)
         canvas.add(s_d2)
@@ -449,7 +450,7 @@ class CanvasUtils {
         if (color[3]<opacityThreshold || color.a<opacityThreshold) return;
 
         if (radiusPaddingMultiplier) {// also, only if sourcePos is Dot
-            const res = dot.getLinearIntersectPoints(target, (target.radius??_Obj.DEFAULT_RADIUS)*radiusPaddingMultiplier, dot, dot.radius*radiusPaddingMultiplier)
+            const res = dot.getLinearIntersectPoints(target, Math.max((target.radius??_Obj.DEFAULT_RADIUS), .1)*radiusPaddingMultiplier, dot, Math.max(dot.radius*radiusPaddingMultiplier, .1))
             if (filter&&filter.indexOf("#")!==-1 && !forceBatching) dot.render.stroke(lineType(res[0][0], res[1][0], spread), renderStyles)
             else dot.render.batchStroke(lineType(res[0][0], res[1][0], spread), renderStyles)
         } else {
@@ -491,11 +492,28 @@ class CanvasUtils {
 
     /**
      * Generic function to get a callback that can make a dot draggable and throwable. This function should only be called once, but the returned callback, every frame.
+     * @param {Boolean?} disableMultipleDrag: if true, disables dragging multiple objects at once
      * @returns a callback to be called in the drawEffectCB of the shape containing the dot, only for the dot, and giving the following parameters: (dot, mouse, dist, ratio, pickableRadius?)=>{...}
      */
-    static getDraggableDotCB() {
+    static getDraggableDotCB(disableMultipleDrag=true) {
         let mouseup = false, dragAnim = null
-        return (dot, mouse, dist, ratio, pickableRadius=50)=>{
+        return disableMultipleDrag ? (dot, mouse, dist, ratio, pickableRadius=20)=>{
+            const draggedObjId = mouse.holdValue.draggedObjId
+            if (mouse.clicked && ((!draggedObjId && dist < pickableRadius) || draggedObjId == dot.id)) {
+                mouse.holdValue.draggedObjId = dot.id
+                mouseup = true
+                if (dot?.currentBacklogAnim?.id == dragAnim?.id && dragAnim) dragAnim.end()
+                dot.x = mouse.x
+                dot.y = mouse.y
+            } else if (mouseup) {
+                mouse.holdValue.draggedObjId = null
+                mouseup = false
+                dragAnim = dot.addForce(Math.min(CDEUtils.mod(Math.min(mouse.speed,3000), ratio)/4, 300), mouse.dir, 750+ratio*1200, Anim.easeOutQuad)
+            } else if (!mouse.clicked && draggedObjId) {
+                console.log("HEY!")
+                mouse.holdValue.draggedObjId = null
+            }
+        } : (dot, mouse, dist, ratio, pickableRadius=50)=>{
             if (mouse.clicked && dist < pickableRadius) {
                 mouseup = true
                 if (dot?.currentBacklogAnim?.id == dragAnim?.id && dragAnim) dragAnim.end()
@@ -1766,7 +1784,7 @@ class Mouse {
         this._scrollClicked = false      // whether the scroll button of the mouse is active (pressed)
         this._extraForwardClicked = false// whether the extra foward button of the mouse is active (not present on every mouse)
         this._extraBackClicked = false   // whether the extra back button of the mouse is active (not present on every mouse)
-        this._holdValue = null           // a custom manual value. Ex: can be used to easily reference an object the mouse is holding
+        this._holdValue = {}           // a custom manual value. Ex: can be used to easily reference an object the mouse is holding
         this._listeners = []             // list of all current listeners
 
         this._moveListenersOptimizationEnabled = true // when true, only checks move listeners on mouse move, else checks every frame
@@ -3343,20 +3361,22 @@ class Canvas {
 
     // main loop, runs every frame
     #loop(time, wasRestarted) {
-        const frameTime = (time-this.#lastFrame)*this._speedModifier, fpsLimit = this._fpsLimit
+        const frameTime = (time-this.#lastFrame)*this._speedModifier, fpsLimit = this._fpsLimit, state = this._state
 
-        if (fpsLimit) {
-            const timeDiff = time-this.#lastLimitedFrame
-            if (timeDiff >= fpsLimit) {
+        if (state != 2) {
+            if (fpsLimit) {
+                const timeDiff = time-this.#lastLimitedFrame
+                if (timeDiff >= fpsLimit) {
+                    this._fixedTimeStamp = ((this.#timeStamp += frameTime)-this.#fixedTimeStampOffset)
+                    if (!wasRestarted) this.#loopCore(time)
+                    this.#lastFrame = time
+                    this.#lastLimitedFrame = time-(timeDiff%fpsLimit)
+                }
+            } else {
                 this._fixedTimeStamp = ((this.#timeStamp += frameTime)-this.#fixedTimeStampOffset)
                 if (!wasRestarted) this.#loopCore(time)
                 this.#lastFrame = time
-                this.#lastLimitedFrame = time-(timeDiff%fpsLimit)
             }
-        } else {
-            this._fixedTimeStamp = ((this.#timeStamp += frameTime)-this.#fixedTimeStampOffset)
-            if (!wasRestarted) this.#loopCore(time)
-            this.#lastFrame = time
         }
 
         if (this._state==1) CDE_CANVAS_TIMEOUT_FUNCTION(this.#loop.bind(this))
@@ -3931,7 +3951,7 @@ class Canvas {
     /**
      * Returns whether the provided position is within the canvas bounds
      * @param {[x,y]} pos: the pos to check 
-     * @param {Number | [paddingTop, paddingRight?, paddingBottom?, paddingLeft?] ?} padding: the padding applied to the results
+     * @param {Number?} padding: the padding applied to the results
      */
     isWithin(pos, padding=0) {
         const viewPos = this._viewPos
@@ -4035,9 +4055,13 @@ class Canvas {
             if (!isVisible) this.#visibilityChangeLastState = this._state
             if (this.#visibilityChangeLastState==1) {
                 if (isVisible) {
+                    console.log("play")
                     this.startLoop()
                     this.resetReferences()
-                } else this.stopLoop()
+                } else {
+                    console.log("stop")
+                    this.stopLoop()
+                }
             }
             if (CDEUtils.isFunction(onVisibilityChangeCB)) onVisibilityChangeCB(isVisible, CVS, e)
         }
@@ -4422,7 +4446,7 @@ class _BaseObj extends _HasColor {
     playAnim(anim, isUnique, force) {
         if (isUnique && this.currentBacklogAnim && force) {
             this.currentBacklogAnim.end()
-            CDEUtils.addAt(this._anims.backlog, anim, 0)
+            this._anims.backlog = CDEUtils.addAt(this._anims.backlog, anim, 0)
         }
         const initEndCB = anim.endCB
         anim.endCB=()=>{
@@ -6652,7 +6676,7 @@ class Shape extends _Obj {
      * @param {Number} length: the width in pixels of the generation result
      * @param {Number} gapX: the gap in pixel skipped between each generation
      * @param {[Number, Number]} yModifier: a range allowing random Y offsets
-     * @param {Function?} generationCallback: custom callback called on each generation (this, lastDot)=>
+     * @param {Function?} generationCallback: custom callback called on each generation (dot, lastDot?)=>
      * @returns The generated Dots
      */
     static generate(yFn, startOffset, length, gapX, yModifier, generationCallback) {
@@ -6665,7 +6689,7 @@ class Shape extends _Obj {
         let dots = [], lastDot = null, isGenCB = CDEUtils.isFunction(generationCallback)
         for (let x=0;x<=length;x+=CDEUtils.getValueFromRange(gapX)) {
             const dot = new Dot([startOffset[0]+x, startOffset[1]+CDEUtils.getValueFromRange(yModifier)+yFn(x)])
-            if (lastDot && isGenCB) generationCallback(dot, lastDot)
+            if ((lastDot||dot) && isGenCB) generationCallback(dot, lastDot)
             dots.push(dot)
             lastDot = dot
         }
@@ -7645,7 +7669,7 @@ class Dot extends _Obj {
             t_qD = Math.sqrt(t_qB**2-(4*(qA/2)*((b-ty)**2+tx**2-t_r))),
             s_x1 = (s_qB+s_qD)/qA, s_x2 = (s_qB-s_qD)/qA, t_x1 = (t_qB+t_qD)/qA, t_x2 = (t_qB-t_qD)/qA,
             s_y1 = lfn(s_x1), s_y2 = lfn(s_x2), t_y1 = lfn(t_x1), t_y2 = lfn(t_x2)
-        return [[[s_x1, s_y1], [s_x2, s_y2]], [[t_x2, t_y2], [t_x1, t_y1]]]
+        return CDEUtils.getDist(s_x1, s_y1, t_x2, t_y2) < CDEUtils.getDist(s_x2, s_y2, t_x1, t_y1) ? [[[s_x1, s_y1], [s_x2, s_y2]], [[t_x2, t_y2], [t_x1, t_y1]]] : [[[s_x2, s_y2], [s_x1, s_y1]], [[t_x1, t_y1], [t_x2, t_y2]]]
     }
 
     /**
@@ -7666,10 +7690,10 @@ class Dot extends _Obj {
      * Returns a separate copy of this Dot
      */
     duplicate(pos=this.getInitPos(), radius=this._radius, color=this._color, setupCB=this._setupCB, anchorPos=this._anchorPos, activationMargin=this._activationMargin, disablePathCaching=!this._cachedPath) {
-        const colorObject = color, colorRaw = colorObject.colorRaw, dot = new Dot(
+        const colorObject = color, colorRaw = colorObject?.colorRaw, dot = new Dot(
             pos,
             radius,
-            (colorRaw instanceof Gradient||colorRaw instanceof Pattern) && colorRaw._initPositions.id != null && this._parent.id != null && colorRaw._initPositions.id == this._parent.id ? null:(_,dot)=>(colorRaw instanceof Gradient||colorRaw instanceof Pattern)?colorRaw.duplicate(Array.isArray(colorRaw.initPositions)?null:dot):colorObject.duplicate(),
+            colorObject&&((colorRaw instanceof Gradient||colorRaw instanceof Pattern) && colorRaw._initPositions.id != null && this._parent.id != null && colorRaw._initPositions.id == this._parent.id ? null:(_,dot)=>(colorRaw instanceof Gradient||colorRaw instanceof Pattern)?colorRaw.duplicate(Array.isArray(colorRaw.initPositions)?null:dot):colorObject.duplicate()),
             setupCB,
             anchorPos,
             activationMargin,
