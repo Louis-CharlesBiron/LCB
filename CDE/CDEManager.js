@@ -40,4 +40,4 @@ CVS1.setMouseDown(()=>{
     loop1Obj.setupResults = getBorderPaths()
 })
 CVS1.setMouseUp()
-//CVS1.start()
+CVS1.start()

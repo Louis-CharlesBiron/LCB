@@ -194,6 +194,7 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type=
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .ci_textContent {
@@ -276,12 +277,13 @@ c {
     font-weight: bold;
 }
 
-.textImg {
+#textImg {
     white-space: pre;
     letter-spacing: -1px;
     line-height: 12px;
     font-size: 14px;
     text-align: center;
+    display: block;
 }
 
 .image {
@@ -379,9 +381,19 @@ p {
 }
 #startCDEPreview:hover {
     filter: brightness(1.5);
-    box-shadow: 0 0 10px 0px rgb(var(--c5));
+    box-shadow: 0 0 80px 0px rgb(var(--c5));
 }
 #startCDEPreview:active {
     filter: brightness(2.5);
     box-shadow: 0 0 240px 8px rgb(var(--c5));
 }
+
+#toggleCDEPreviewAudio {
+    position: absolute;
+    left: 1.5%;
+    top: 21%;
+}
+#toggleCDEPreviewAudio:not([disabled]):hover {
+    opacity: 1 !important;
+}
+

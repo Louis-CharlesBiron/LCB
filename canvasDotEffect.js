@@ -1,3 +1,4 @@
+// CanvasDotEffect UMD - v1.2.1
 'use strict';
 // JS
 // Canvas Dot Effect by Louis-Charles Biron
@@ -399,10 +400,10 @@ class CanvasUtils {
 
     // DEBUG // Create dots at provided intersection points
     static showIntersectionPoints(canvas, res) {
-        const s_d1 = new Dot(res[0][0], 3, [255,0,0,.45]),
-            s_d2 = new Dot(res[0][1], 3, [0,0,255,0.45]),
-            t_d1 = new Dot(res[1][1], 3, [0,0,255,0.45]),
-            t_d2 = new Dot(res[1][0], 3, [255,0,0,.45])
+        const s_d1 = new Dot(res[0][0], 3, [255,0,0,1]),
+            s_d2 = new Dot(res[0][1], 3, [255,0,0,0.45]),
+            t_d1 = new Dot(res[1][1], 3, [255,0,0,0.45]),
+            t_d2 = new Dot(res[1][0], 3, [255,0,0,1])
         
         canvas.add(s_d1)
         canvas.add(s_d2)
@@ -490,6 +491,7 @@ class CanvasUtils {
         }
     }
 
+
     /**
      * Generic function to get a callback that can make a dot draggable and throwable. This function should only be called once, but the returned callback, every frame.
      * @param {Boolean?} disableMultipleDrag: if true, disables dragging multiple objects at once
@@ -509,10 +511,7 @@ class CanvasUtils {
                 mouse.holdValue.draggedObjId = null
                 mouseup = false
                 dragAnim = dot.addForce(Math.min(CDEUtils.mod(Math.min(mouse.speed,3000), ratio)/4, 300), mouse.dir, 750+ratio*1200, Anim.easeOutQuad)
-            } else if (!mouse.clicked && draggedObjId) {
-                console.log("HEY!")
-                mouse.holdValue.draggedObjId = null
-            }
+            } else if (!mouse.clicked && draggedObjId) mouse.holdValue.draggedObjId = null
         } : (dot, mouse, dist, ratio, pickableRadius=50)=>{
             if (mouse.clicked && dist < pickableRadius) {
                 mouseup = true
@@ -785,7 +784,7 @@ class Color {
     static SEARCH_STARTS = {TOP_LEFT:"TOP_LEFT", BOTTOM_RIGHT:"BOTTOM_RIGHT"}
     static DEFAULT_SEARCH_START = Color.SEARCH_STARTS.TOP_LEFT
     static DEFAULT_DECIMAL_ROUNDING_POINT = 3
-    static OPACITY_VISIBILITY_THRESHOLD = 0.05
+    static OPACITY_VISIBILITY_THRESHOLD = 0.029
     
     #rgba = null // cached rgba value
     #hsv = null  // cached hsv value
@@ -1784,7 +1783,7 @@ class Mouse {
         this._scrollClicked = false      // whether the scroll button of the mouse is active (pressed)
         this._extraForwardClicked = false// whether the extra foward button of the mouse is active (not present on every mouse)
         this._extraBackClicked = false   // whether the extra back button of the mouse is active (not present on every mouse)
-        this._holdValue = {}           // a custom manual value. Ex: can be used to easily reference an object the mouse is holding
+        this._holdValue = {}             // a custom manual value. Ex: can be used to easily reference an object the mouse is holding
         this._listeners = []             // list of all current listeners
 
         this._moveListenersOptimizationEnabled = true // when true, only checks move listeners on mouse move, else checks every frame
@@ -3248,8 +3247,6 @@ class Canvas {
         this._mouseMoveThrottlingDelay = Canvas.DEFAULT_MOUSE_MOVE_THROTTLE_DELAY// mouse move throttling delay
     }
 
-    get hasBeenStarted() {return Boolean(this.timeStamp)}
-
     // sets css styles on the canvas and the parent
     #initStyles() {
         const style = document.createElement("style")
@@ -3272,9 +3269,7 @@ class Canvas {
             RenderStyles.apply(render, null, filter, compositeOperation, alpha, lineWidth, lineDash, lineDashOffset, lineJoin, lineCap)
             TextStyles.apply(ctx, font, letterSpacing, wordSpacing, fontVariantCaps, direction, fontStretch, fontKerning, textAlign, textBaseline, textRendering)
             this.moveViewAt(this._viewPos)
-            if (this.hasBeenStarted && (this._fpsLimit >= 25 || this._state==Canvas.STATES.STOPPED)) {
-                this.drawSingleFrame()
-            }
+            if (this.hasBeenStarted && (this._fpsLimit >= 25 || this._state==Canvas.STATES.STOPPED)) this.drawSingleFrame()
             if (CDEUtils.isFunction(this._onResizeCB)) this._onResizeCB(this.size, this, e)
         },
         onvisibilitychange=e=>this._onVisibilityChangeCB(!document.hidden, this, e),
@@ -4059,6 +4054,7 @@ class Canvas {
     get isOffscreenCanvas() {return this._cvs instanceof OffscreenCanvas} 
     get mouseMoveThrottlingDelay() {return this._mouseMoveThrottlingDelay}
     get dimensions() {return [[0,0],this.size]}
+    get hasBeenStarted() {return Boolean(this.timeStamp)}
 
 	set id(id) {this._id = id}
 	set loopingCB(loopingCB) {this._loopingCB = loopingCB}
@@ -4075,13 +4071,9 @@ class Canvas {
             if (!isVisible) this.#visibilityChangeLastState = this._state
             if (this.#visibilityChangeLastState==1) {
                 if (isVisible) {
-                    console.log("play")
                     this.startLoop()
                     this.resetReferences()
-                } else {
-                    console.log("stop")
-                    this.stopLoop()
-                }
+                } else this.stopLoop()
             }
             if (CDEUtils.isFunction(onVisibilityChangeCB)) onVisibilityChangeCB(isVisible, CVS, e)
         }
@@ -4753,6 +4745,7 @@ class AudioDisplay extends _BaseObj {
     static BIQUAD_FILTER_TYPES = {DEFAULT:"allpass", ALLPASS:"allpass", BANDPASS:"bandpass", HIGHPASS:"highpass", HIGHSHELF:"highshelf", LOWPASS:"lowpass", LOWSHELF:"lowshelf", NOTCH:"notch", PEAKING:"peaking"}
     static IS_MICROPHONE_SUPPORTED = ()=>!!navigator?.mediaDevices?.getUserMedia
     static IS_SCREEN_ADUIO_SUPPORTED = ()=>!!navigator?.mediaDevices?.getDisplayMedia
+    static DEFAULT_MEDIA_ERROR_CALLBACK = (errorCode, media)=>console.warn("Error while loading media:", AudioDisplay.getErrorFromCode(errorCode), "("+media+")")
 
     #buffer_ll = null // the length of data
     #data = null      // the fft data values (raw bins)
@@ -4767,7 +4760,7 @@ class AudioDisplay extends _BaseObj {
      * @param {Number?} sampleCount: the max count of bins, (fftSize is calculated by the nearest valid value). Ex: if sampleCount is "32" and the display style is "BARS", 32 bars will be displayed
      * @param {Boolean?} disableAudio: whether the audio output is disabled or not (does not affect the visual display)
      * @param {Number?} offsetPourcent: the offset pourcent (0..1) in the bins order when calling binCB
-     * @param {Function?} errorCB: a function called if there is an error with the source (errorType, e?)=>
+     * @param {Function?} errorCB: a function called if there is an error with the source (errorType, source, e?)=>
      * @param {Function?} setupCB: function called on object's initialization (this, parent)=>{...}
      * @param {Function?} loopCB: function called each frame for this object (this)=>{...}
      * @param {[x,y] | Function | _BaseObj ?} anchorPos: reference point from which the object's pos will be set. Either a pos array, a callback (this, parent)=>{return [x,y] | _baseObj} or a _BaseObj inheritor
@@ -4780,7 +4773,7 @@ class AudioDisplay extends _BaseObj {
         this._sampleCount = sampleCount??AudioDisplay.DEFAULT_SAMPLE_COUNT// the max count of bins, (fftSize is calculated by the nearest valid value). Ex: if sampleCount is "32" and the display style is "BARS", 32 bars will be displayed
         this._disableAudio = disableAudio??false                          // whether the audio output is disabled or not (does not affect the visual display) 
         this._offsetPourcent = offsetPourcent??0                          // the offset pourcent (0..1) in the bins when calling binCB. 
-        this._errorCB = errorCB                                           // a callback called if there is an error with the source (errorType, e?)=>
+        this._errorCB = errorCB||AudioDisplay.DEFAULT_MEDIA_ERROR_CALLBACK// a callback called if there is an error with the source (errorType, source, e?)=>
         this._transformable = 0                                           // if above 0, allows transformations with non batched canvas operations
 
         // audio stuff
@@ -5443,6 +5436,7 @@ class ImageDisplay extends _BaseObj {
     static ERROR_TYPES = {NO_PERMISSION:0, DEVICE_IN_USE:1, SOURCE_DISCONNECTED:2, FILE_NOT_FOUND:3, NOT_AVAILABLE:4, NOT_SUPPORTED:5}
     static IS_CAMERA_SUPPORTED = ()=>!!navigator?.mediaDevices?.getUserMedia
     static IS_SCREEN_RECORD_SUPPORTED = ()=>!!navigator?.mediaDevices?.getDisplayMedia
+    static DEFAULT_MEDIA_ERROR_CALLBACK = (errorCode, media)=>console.warn("Error while loading media:", ImageDisplay.getErrorFromCode(errorCode), "("+media+")")
 
     #naturalSize = null
     
@@ -5451,7 +5445,7 @@ class ImageDisplay extends _BaseObj {
      * @param {CanvasImageSource} source: a media source, such as an image or a video
      * @param {[x,y]?} pos: the [x,y] pos of the top left of the object
      * @param {[width, height]?} size: the width and height of the display. Either as pixels or as pourcentiles (ex: ["50%", 200])
-     * @param {Function?} errorCB: function called upon any error loading the media
+     * @param {Function?} errorCB: function called upon any error loading the media (errorType, source, e?)=>
      * @param {Function?} setupCB: function called on object's initialization (this, parent)=>{...}
      * @param {Function?} loopCB: function called each frame for this object (this)=>{...}
      * @param {[x,y] | Function | _BaseObj ?} anchorPos: reference point from which the object's pos will be set. Either a pos array, a callback (this, parent)=>{return [x,y] | _baseObj} or a _BaseObj inheritor
@@ -5461,7 +5455,7 @@ class ImageDisplay extends _BaseObj {
         super(pos, null, setupCB, loopCB, anchorPos, activationMargin)
         this._source = source               // the data source
         this._size = size||[]               // the display size of the image (resizes)
-        this._errorCB = errorCB             // a callback called if there is an error with the source (errorType, e?)=>
+        this._errorCB = errorCB||ImageDisplay.DEFAULT_MEDIA_ERROR_CALLBACK// a callback called if there is an error with the source (errorType, source, e?)=>
         this._sourceCroppingPositions = null// data source cropping positions delimiting a rectangle, [ [startX, startY], [endX, endY] ] (Defaults to no cropping)
     }
 
@@ -6255,7 +6249,7 @@ class Pattern extends _DynamicColor {
      * @param {Boolean?} keepAspectRatio: Whether the media should resize by keeping the original aspect ratio
      * @param {Pattern.FORCE_UPDATE_LEVELS?} forcedUpdates: whether/how the pattern forces updates
      * @param {Number?} rotation: the rotation in degrees 
-     * @param {Function?} errorCB: function called upon any error loading the media
+     * @param {Function?} errorCB: function called upon any error loading the media. (errorType, source, e?)=>
      * @param {Function?} readyCB: function called when the media is loaded
      * @param {Number?} frameRate: how many times per seconds should the media update (mostly used for videos)
      * @param {Pattern.REPETITION_MODES} repeatMode: the repetition mode used for displaying the media at a larger size than what it's covering
@@ -6273,7 +6267,7 @@ class Pattern extends _DynamicColor {
         this._forcedUpdates = forcedUpdates??Pattern.DEFAULT_FORCE_UPDATE_LEVEL// whether/how the pattern forces updates
         const rawFrameRate = frameRate??Pattern.DEFAULT_FRAME_RATE
         this._frameRate = (rawFrameRate%1) ? rawFrameRate : 1/Math.max(rawFrameRate, 0) // update frequency of video/canvas sources
-        this._errorCB = errorCB                                                // a callback called if there is an error with the source (errorType, e?)=>
+        this._errorCB = errorCB||ImageDisplay.DEFAULT_MEDIA_ERROR_CALLBACK     // a callback called if there is an error with the source (errorType, source, e?)=>
         this._readyCB = readyCB                                                // custom callback ran upon source load
         this._repeatMode = repeatMode??Pattern.DEFAULT_REPETITION_MODE         // whether the pattern repeats horizontally/vertically
 
@@ -6997,7 +6991,7 @@ class Shape extends _Obj {
     }
 
     /**
-     * Disables the object by setting its and all its dots' activation margin to 0
+     * Disables the object by setting its and allf its dots' activation margin to 0
      */
     disable() {
         const dots = this._dots, d_ll = dots.length
@@ -7675,22 +7669,22 @@ class Dot extends _Obj {
      * @param {Dot | pos} source: a Dot or a pos [x,y] (Defaults to this object)
      * @param {Number} sourcePadding: the padding radius of the source (Defaults to the source radius if it's a Dot, or 5)
      * @returns {
-     *      source: [ [x, y], [x, y] ]
-     *      target: [ [x, y], [x, y] ]
-     * } The 2 intersection points for the target and for the source
-     */
-    getLinearIntersectPoints(target=this._connections[0], targetPadding=target.radius??5, source=this, sourcePadding=this.radius??5) {
-        const [tx, ty] = target.pos??target, [sx, sy] = source.pos??source,
-            [a, b, lfn] = CDEUtils.getLinearFn([sx,sy], [tx,ty]), t_r = targetPadding**2, s_r = sourcePadding**2,
-            qA = (1+a**2)*2,
-            s_qB = -(2*a*(b-sy)-2*sx),
-            s_qD = Math.sqrt(s_qB**2-(4*(qA/2)*((b-sy)**2+sx**2-s_r))),
-            t_qB = -(2*a*(b-ty)-2*tx),
-            t_qD = Math.sqrt(t_qB**2-(4*(qA/2)*((b-ty)**2+tx**2-t_r))),
-            s_x1 = (s_qB+s_qD)/qA, s_x2 = (s_qB-s_qD)/qA, t_x1 = (t_qB+t_qD)/qA, t_x2 = (t_qB-t_qD)/qA,
-            s_y1 = lfn(s_x1), s_y2 = lfn(s_x2), t_y1 = lfn(t_x1), t_y2 = lfn(t_x2)
-        return CDEUtils.getDist(s_x1, s_y1, t_x2, t_y2) < CDEUtils.getDist(s_x2, s_y2, t_x1, t_y1) ? [[[s_x1, s_y1], [s_x2, s_y2]], [[t_x2, t_y2], [t_x1, t_y1]]] : [[[s_x2, s_y2], [s_x1, s_y1]], [[t_x1, t_y1], [t_x2, t_y2]]]
-    }
+    *      source: [ [x, y], [x, y] ]
+    *      target: [ [x, y], [x, y] ]
+    * } The 2 intersection points for the target and for the source
+    */
+   getLinearIntersectPoints(target=this._connections[0], targetPadding=target.radius??5, source=this, sourcePadding=this.radius??5) {
+       const [tx, ty] = target.pos??target, [sx, sy] = source.pos??source,
+           [a, b, lfn] = CDEUtils.getLinearFn([sx,sy], [tx,ty]), t_r = targetPadding**2, s_r = sourcePadding**2,
+           qA = (1+a**2)*2,
+           s_qB = -(2*a*(b-sy)-2*sx),
+           s_qD = Math.sqrt(s_qB**2-(4*(qA/2)*((b-sy)**2+sx**2-s_r))),
+           t_qB = -(2*a*(b-ty)-2*tx),
+           t_qD = Math.sqrt(t_qB**2-(4*(qA/2)*((b-ty)**2+tx**2-t_r))),
+           s_x1 = (s_qB+s_qD)/qA, s_x2 = (s_qB-s_qD)/qA, t_x1 = (t_qB+t_qD)/qA, t_x2 = (t_qB-t_qD)/qA,
+           s_y1 = lfn(s_x1), s_y2 = lfn(s_x2), t_y1 = lfn(t_x1), t_y2 = lfn(t_x2)
+       return CDEUtils.getDist(s_x1, s_y1, t_x2, t_y2) < CDEUtils.getDist(s_x2, s_y2, t_x1, t_y1) ? [[[s_x1, s_y1], [s_x2, s_y2]], [[t_x2, t_y2], [t_x1, t_y1]]] : [[[s_x2, s_y2], [s_x1, s_y1]], [[t_x1, t_y1], [t_x2, t_y2]]]
+   }
 
     /**
      * Activates path caching and updates the cached path
@@ -7713,7 +7707,7 @@ class Dot extends _Obj {
         const colorObject = color, colorRaw = colorObject?.colorRaw, dot = new Dot(
             pos,
             radius,
-            colorObject&&((colorRaw instanceof Gradient||colorRaw instanceof Pattern) && colorRaw._initPositions.id != null && this._parent.id != null && colorRaw._initPositions.id == this._parent.id ? null:(_,dot)=>(colorRaw instanceof Gradient||colorRaw instanceof Pattern)?colorRaw.duplicate(Array.isArray(colorRaw.initPositions)?null:dot):colorObject.duplicate()),
+            (colorRaw instanceof Gradient||colorRaw instanceof Pattern) && colorRaw._initPositions.id != null && this._parent.id != null && colorRaw._initPositions.id == this._parent.id ? null:(_,dot)=>(colorRaw instanceof Gradient||colorRaw instanceof Pattern)?colorRaw.duplicate(Array.isArray(colorRaw.initPositions)?null:dot):colorObject.duplicate(),
             setupCB,
             anchorPos,
             activationMargin,

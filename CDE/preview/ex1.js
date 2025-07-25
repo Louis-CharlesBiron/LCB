@@ -21,7 +21,6 @@ function getInputRegulationCB(callback, msDelay) {
 
 
 // GRADIENT
-
 function createBgGradient(colorStops, type, height=CVS_cdePreview.height) {
     type ??= Gradient.TYPES.LINEAR
     const backgroundGradient = new FilledShape((ctx, shape)=>new Gradient(ctx, shape, colorStops, type, 65+180), true, null, [
@@ -34,7 +33,10 @@ function createBgGradient(colorStops, type, height=CVS_cdePreview.height) {
     return backgroundGradient
 }
 
-const backgroundGradient1 = createBgGradient([
+let backgroundGradient1, backgroundGradient2, backgroundGradient3
+
+function generateGradients() {
+    backgroundGradient1 = createBgGradient([
         [.0, [2, 0, 36, 1]],
         [.4, [65, 9, 121, .5]],
         [1, [0, 178, 214, .25]]
@@ -48,10 +50,10 @@ const backgroundGradient1 = createBgGradient([
         [.4, [65, 9, 121, .15]],
         [1, [0, 178, 214, .15]]
     ], Gradient.TYPES.RADIAL, 500)
-
-CVS_cdePreview.add(backgroundGradient1)
-CVS_cdePreview.add(backgroundGradient2)
-CVS_cdePreview.add(backgroundGradient3)
+    CVS_cdePreview.add(backgroundGradient1)
+    CVS_cdePreview.add(backgroundGradient2)
+    CVS_cdePreview.add(backgroundGradient3)
+}
 
 
 
@@ -109,11 +111,17 @@ function createStars(gapX=30, maxAlphaInit=1, maxRadiusInit=10, rotationTime=120
     })
 }
 
-const backgroundStars1 = createStars(),
-      backgroundStars2 = createStars(40, 0.2, 5, 600000, [5000, 10000], false, 400, 0.1)
+let backgroundStars1, backgroundStars2
 
-CVS_cdePreview.add(backgroundStars1)
-CVS_cdePreview.add(backgroundStars2)
+function generateStars() {
+    backgroundStars1 = createStars(),
+    backgroundStars2 = createStars(40, 0.2, 5, 600000, [5000, 10000], false, 400, 0.1)
+
+    CVS_cdePreview.add(backgroundStars1)
+    CVS_cdePreview.add(backgroundStars2)
+}
+
+
 
 // GROUND
 function createGround(heightPourcentile, groundColor, groundLineColor, dotSpacing=100) {
@@ -137,26 +145,31 @@ function generateGround() {
     CVS_cdePreview_l2.add(ground2 = createGround(0.88, [12, 10, 43, 1], [57, 63, 110, 1], 70))
     CVS_cdePreview_l2.add(ground3 = createGround(0.935, [4, 8, 35, 1], [44, 50, 93, 1], 157))
 }
-generateGround()
+
+
 
 // TREES
 const treeModifier = CDEUtils.random(0,1), treeSizeMin = 60, treeSizeMax = 80, treeModSize = 0.6, treeXMod = 0.91
-ground1.dots.forEach((dot)=>{
-    const treeModifier = CDEUtils.random(0,1),
-            tree = new ImageDisplay("./img/tree.svg", [-100,-100], [CDEUtils.random(treeXMod*treeSizeMin*(treeModifier||treeModSize), treeXMod*treeSizeMax*(treeModifier||treeModSize))+"%", CDEUtils.random(treeSizeMin*(treeModifier||treeModSize), treeSizeMax*(treeModifier||treeModSize))+"%"], null, (obj)=>{
-                obj.pos = CDEUtils.addPos(dot.pos, [0, -obj.size[1]/2-8])
+function generateTrees() {
+    ground1.dots.forEach((dot)=>{
+        const treeModifier = CDEUtils.random(0,1),
+                tree = new ImageDisplay("./img/tree.svg", [100,100], [CDEUtils.random(treeXMod*treeSizeMin*(treeModifier||treeModSize), treeXMod*treeSizeMax*(treeModifier||treeModSize))+"%", CDEUtils.random(treeSizeMin*(treeModifier||treeModSize), treeSizeMax*(treeModifier||treeModSize))+"%"], null, (obj)=>{
+                    obj.pos = CDEUtils.addPos(dot.pos, [0, -obj.size[1]/2-8])
+                    obj.scaleAt([0.8, 1.01])
+                    setTimeout(()=>{
+                        obj.playAnim(new Anim((prog, i)=>{
+                            obj.scaleAt([fade(prog, i, 0.8, 1.1), fade(prog, i, 1, 1.25)])
+                        }, -10000))
+                    }, CDEUtils.random(0, 5000))
 
-                obj.scaleAt([0.8, 1.01])
-                setTimeout(()=>{
-                    obj.playAnim(new Anim((prog, i)=>{
-                        obj.scaleAt([fade(prog, i, 0.8, 1.1), fade(prog, i, 1, 1.25)])
-                    }, -10000))
-                }, CDEUtils.random(0, 5000))
+                })
+        tree.opacity = treeModifier ? 0.65 : 0.3
+        CVS_cdePreview_l2.add(tree)
+    })
+}
 
-            })
-    tree.opacity = treeModifier ? 0.65 : 0.3
-    CVS_cdePreview_l2.add(tree)
-})
+
+
 
 // TEXT
 TextStyles.loadCustomFont("fonts/BitcountPropSingle/BitcountPropSingle.ttf", "bitcountPropSingle")
@@ -189,12 +202,34 @@ function createFancyLetter(text, pos, color=[225, 225, 255, 0]) {
     })
 }
 
-const text = "You can drag the stars!", letterWidth = createFancyLetter("O").getSize()[0], textWidth = 775, textStartPos = [(CVS_cdePreview.width-textWidth)/2, 200]
-
-for (let i=0;i<text.length;i++) {
-    CVS_cdePreview.add(createFancyLetter(text[i], CDEUtils.addPos(textStartPos, [letterWidth*i, 0])))
+function generateText() {
+    const text = "You can drag the stars!", letterWidth = createFancyLetter("O").getSize()[0], textWidth = 775, textStartPos = [(CVS_cdePreview.width-textWidth)/2, 200]
+    for (let i=0;i<text.length;i++) {
+        CVS_cdePreview.add(createFancyLetter(text[i], CDEUtils.addPos(textStartPos, [letterWidth*i, 0])))
+    }
 }
 
+
+// BACKGROUND DETAILS
+let backgroundAudioDisplay, audioDisplayAlpha = 0.04
+
+function generateAudioDisplay() {
+    const barWidth = 20, barSpacing = 25, barCount = ((CVS_cdePreview.width/(barWidth+(barSpacing-barWidth)))|0)*1.5
+    backgroundAudioDisplay = new AudioDisplay("./medias/You_re_Here_For_Albuca_Spiralis.mp3", [5, ground1.secondDot.y+15], [225,225,255,audioDisplayAlpha], AudioDisplay.BARS(-CVS_cdePreview.height/2, 3, barSpacing, barWidth), barCount, true)
+    CVS_cdePreview.add(backgroundAudioDisplay)
+}
+
+function generateCDEPreview() {
+    generateGradients()
+    generateStars()
+    generateGround()
+    generateTrees()
+    generateText()
+    generateAudioDisplay()
+}
+
+
+// RESIZE ADJUSTMENTS
 CVS_cdePreview.onResizeCB=()=>{
     const newWidth = CVS_cdePreview.width
 
