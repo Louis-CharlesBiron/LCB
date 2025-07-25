@@ -204,7 +204,7 @@ class CDEUtils {
      * @returns the resulting pos array
      */
     static addPos(pos1, pos2) {
-        return [pos1[0]+pos2[0], pos1[1]+pos2[1]]
+        return [(pos1[0]||0)+(pos2[0]||0), (pos1[1]||0)+(pos2[1]||0)]
     }
     
     /**
@@ -214,7 +214,7 @@ class CDEUtils {
      * @returns the resulting pos array
      */
     static subPos(pos1, pos2) {
-        return [pos1[0]-pos2[0], pos1[1]-pos2[1]]
+        return [(pos1[0]||0)-(pos2[0]||0), (pos1[1]||0)-(pos2[1]||0)]
     }
 
     /**
@@ -224,7 +224,7 @@ class CDEUtils {
      * @returns the resulting pos array
      */
     static mulPos(pos1, pos2) {
-        return [pos1[0]*pos2[0], pos1[1]*pos2[1]]
+        return [(pos1[0]||0)*(pos2[0]||0), (pos1[1]||0)*(pos2[1]||0)]
     }
 
     /**
@@ -234,7 +234,7 @@ class CDEUtils {
      * @returns the resulting pos array
      */
     static divPos(pos1, pos2) {
-        return [pos1[0]/pos2[0], pos1[1]/pos2[1]]
+        return [(pos1[0]||0)/(pos2[0]||0), (pos1[1]||0)/(pos2[1]||0)]
     }
 
     /**
@@ -2024,7 +2024,7 @@ class Mouse {
 class Render {
     static PROFILE_ID_GIVER = -1
     static TEXT_PROFILE_ID_GIVER = -1
-    static COMPOSITE_OPERATIONS = {SOURCE_OVER: "source-over", SOURCE_IN: "source-in", SOURCE_OUT: "source-out", SOURCE_ATOP: "source-atop", DESTINATION_OVER: "destination-over", DESTINATION_IN: "destination-in", DESTINATION_OUT: "destination-out", DESTINATION_ATOP: "destination-atop", LIGHTER: "lighter", COPY: "copy", XOR: "xor", MULTIPLY: "multiply", SCREEN: "screen", OVERLAY: "overlay", DARKEN: "darken", LIGHTEN: "lighten", COLOR_DODGE: "color-dodge", COLOR_BURN: "color-burn", HARD_LIGHT: "hard-light", SOFT_LIGHT: "soft-light", DIFFERENCE: "difference", EXCLUSION: "exclusion", HUE: "hue", SATURATION: "saturation", COLOR: "color", LUMINOSITY: "luminosity"}
+    static COMPOSITE_OPERATIONS = {UNDER:"destionation-over", OVER:"source-over", SOURCE_OVER: "source-over", SOURCE_IN: "source-in", SOURCE_OUT: "source-out", SOURCE_ATOP: "source-atop", DESTINATION_OVER: "destination-over", DESTINATION_IN: "destination-in", DESTINATION_OUT: "destination-out", DESTINATION_ATOP: "destination-atop", LIGHTER: "lighter", COPY: "copy", XOR: "xor", MULTIPLY: "multiply", SCREEN: "screen", OVERLAY: "overlay", DARKEN: "darken", LIGHTEN: "lighten", COLOR_DODGE: "color-dodge", COLOR_BURN: "color-burn", HARD_LIGHT: "hard-light", SOFT_LIGHT: "soft-light", DIFFERENCE: "difference", EXCLUSION: "exclusion", HUE: "hue", SATURATION: "saturation", COLOR: "color", LUMINOSITY: "luminosity"}
     static FILTERS = {BLUR:v=>`blur(${v}px)`,BRIGHTNESS:v=>`brightness(${v})`,CONTRAST:v=>`contrast(${v})`,DROPSHADOW:(value)=>`drop-shadow(${value})`,GRAYSCALE:v=>`grayscale(${v})`,HUE_ROTATE:v=>`hue-rotate(${v}deg)`,INVERT:v=>`invert(${v})`,OPACITY:v=>`opacity(${v})`,SATURATE:v=>`saturate(${v})`,SEPIA:v=>`sepia(${v})`,URL:v=>`url(${v})`}
     static DEFAULT_COMPOSITE_OPERATION = Render.COMPOSITE_OPERATIONS.SOURCE_OVER
     static DEFAULT_FILTER = "none"
@@ -2925,6 +2925,22 @@ class TextStyles {
         }
     }
 
+    /**
+     * Formats possible font styling parameters into a valid font string
+     * @param {String} family: the font-family value
+     * @param {String} size: the font-size value
+     * @param {String?} weight: the font-weight value
+     * @param {String?} style: the font-style value
+     * @param {String?} variant: the font-variant value
+     * @param {String?} lineHeight: the line-height value
+     * @returns a string usable for the canvas context "font" property 
+     */
+    static getFontStyleDeclaration(family, size, weight=null, style=null, variant=null, lineHeight=null) {
+        if (lineHeight) size = `${size}/${lineHeight}`
+        family = family.split(",").map(f=>((f=f.trim()).includes(" ") && !f.match(/['"`]/g)) ? `'${f}'` : f).join(", ")
+        return [style, variant, weight, size, family].filter(Boolean).join(" ")
+    }
+
     get id() {return this.id}
     get render() {return this._render}
 	get font() {return this._font}
@@ -3232,6 +3248,8 @@ class Canvas {
         this._mouseMoveThrottlingDelay = Canvas.DEFAULT_MOUSE_MOVE_THROTTLE_DELAY// mouse move throttling delay
     }
 
+    get hasBeenStarted() {return Boolean(this.timeStamp)}
+
     // sets css styles on the canvas and the parent
     #initStyles() {
         const style = document.createElement("style")
@@ -3254,7 +3272,9 @@ class Canvas {
             RenderStyles.apply(render, null, filter, compositeOperation, alpha, lineWidth, lineDash, lineDashOffset, lineJoin, lineCap)
             TextStyles.apply(ctx, font, letterSpacing, wordSpacing, fontVariantCaps, direction, fontStretch, fontKerning, textAlign, textBaseline, textRendering)
             this.moveViewAt(this._viewPos)
-            if (this.fpsLimit==Canvas.STATIC || this._state==Canvas.STATES.STOPPED) this.drawSingleFrame()
+            if (this.hasBeenStarted && (this._fpsLimit >= 25 || this._state==Canvas.STATES.STOPPED)) {
+                this.drawSingleFrame()
+            }
             if (CDEUtils.isFunction(this._onResizeCB)) this._onResizeCB(this.size, this, e)
         },
         onvisibilitychange=e=>this._onVisibilityChangeCB(!document.hidden, this, e),

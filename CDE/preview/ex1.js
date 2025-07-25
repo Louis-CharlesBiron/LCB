@@ -1,17 +1,3 @@
-
-
-const backgroundGradient = new FilledShape((ctx, shape)=>new Gradient(ctx, shape, [
-    [.0, [2, 0, 36, 1]],
-    [.4, [65, 9, 121, 0.5]],
-    [1, [0, 178, 214, 0.25]]
-  ], null, 65+180), true, null, [
-    new Dot([0,0]),
-    new Dot([CVS_cdePreview.width,0]),
-    new Dot([CVS_cdePreview.width, CVS_cdePreview.height]),
-    new Dot([0, CVS_cdePreview.height]),
-], 0)
-backgroundGradient.compositeOperation = Render.COMPOSITE_OPERATIONS.DESTINATION_OVER
-
 // TODO, put in Utils
 function fade(prog, i, minValue=0, maxValue=5) {
     maxValue -= minValue
@@ -25,59 +11,204 @@ function getNearestDots(dot, shape) {
     }
     return res.toSorted((d1, d2)=>d1[1]-d2[1])
 }
+function getInputRegulationCB(callback, msDelay) {
+    let timeout
+    return ()=>{
+        clearTimeout(timeout)
+        timeout = setTimeout(()=>callback(), msDelay)
+    }
+}
 
-const backgroundStars = new Shape([0,CVS_cdePreview.height/2],
-    Shape.generate(null, [0,0], CVS_cdePreview.width, 25, [-CVS_cdePreview.height/2, CVS_cdePreview.height/2], (dot, nextDot)=>{
 
-        let distance = CDEUtils.random(-35, 35), modifier = CDEUtils.random(0.1, 1, 2), modifier2 = CDEUtils.random(-1,1), duration = -CDEUtils.random(4000, 7000), iy = dot.y, ay = 0
-        setTimeout(()=>{
-            dot.playAnim(new Anim((prog, i) => {
-                const dy = ((i%2)||-1)*distance*prog-ay
-                dot.y += dy
-                ay += dy
+// GRADIENT
+
+function createBgGradient(colorStops, type, height=CVS_cdePreview.height) {
+    type ??= Gradient.TYPES.LINEAR
+    const backgroundGradient = new FilledShape((ctx, shape)=>new Gradient(ctx, shape, colorStops, type, 65+180), true, null, [
+        new Dot([0,CVS_cdePreview.height-height]),
+        new Dot([CVS_cdePreview.width,CVS_cdePreview.height-height]),
+        new Dot([CVS_cdePreview.width, CVS_cdePreview.height]),
+        new Dot([0, CVS_cdePreview.height]),
+    ], 0)
+    backgroundGradient.compositeOperation = Render.COMPOSITE_OPERATIONS.LIGHTER
+    return backgroundGradient
+}
+
+const backgroundGradient1 = createBgGradient([
+        [.0, [2, 0, 36, 1]],
+        [.4, [65, 9, 121, .5]],
+        [1, [0, 178, 214, .25]]
+    ]),
+    backgroundGradient2 = createBgGradient([
+        [0, [239, 213, 255, 1]],
+        [1, [0,0,0,0]]
+    ]),
+    backgroundGradient3 = createBgGradient([
+        [0, [2, 0, 36,   .15]],
+        [.4, [65, 9, 121, .15]],
+        [1, [0, 178, 214, .15]]
+    ], Gradient.TYPES.RADIAL, 500)
+
+CVS_cdePreview.add(backgroundGradient1)
+CVS_cdePreview.add(backgroundGradient2)
+CVS_cdePreview.add(backgroundGradient3)
+
+
+
+// STARS
+function createStars(gapX=30, maxAlphaInit=1, maxRadiusInit=10, rotationTime=120000, dotAnimDurationRange=[4000, 7000], enableGlow=true, limit=100, lineOpacitySubstractor=0.08, rotationDir=1) {
+    return new Shape([0,CVS_cdePreview.height/2],
+        Shape.generate(null, [0,0], CVS_cdePreview.width, gapX, [-CVS_cdePreview.height/2, CVS_cdePreview.height/2], (dot)=>{
     
-                const maxAlpha = 1*modifier, maxRadius = 8-(4*modifier)
-                dot.a = fade(prog, i, 0.15, maxAlpha)
-                dot.radius = fade(prog, i, 2, maxRadius)
-            
+            let distance = CDEUtils.random(-38, 38), modifier = CDEUtils.random(0.1, 1, 2), duration = -CDEUtils.random(...dotAnimDurationRange), iy = dot.y, ay = 0
+            setTimeout(()=>{
+                dot.playAnim(new Anim((prog, i)=>{
+                    const dy = ((i%2)||-1)*distance*prog-ay
+                    dot.y += dy
+                    ay += dy
+        
+                    const maxAlpha = maxAlphaInit*modifier, maxRadius = maxRadiusInit-((maxRadiusInit/2)*modifier)
+                    dot.a = fade(prog, i, 0.15, maxAlpha)
+                    dot.radius = fade(prog, i, 2, maxRadius)
+                
+                    if (prog == 1) {
+                        iy = dot.y
+                        ay = 0
+                    }
+                }, duration, Anim.easeInOutQuad))
+            }, CDEUtils.random(0, 2000))
+            dot.setupResults = CanvasUtils.getDraggableDotCB(true)
+    
+        }), 0, [225, 225, 255, 0], limit, (render, dot, ratio, setupRes, mouse, dist, shape)=>{
+    
+            const nearestDots = getNearestDots(dot, shape), nd_ll = nearestDots.length, threshold = 100
+            for (let i=0;i<nd_ll;i++) {
+                const dotInfo = nearestDots[i]
+                if (dotInfo[1] > threshold) break
+                CanvasUtils.drawLine(dotInfo[0], dot, [225,225,255,CDEUtils.mod(dot.a-lineOpacitySubstractor, dot.getRatio(dotInfo[1]))], 3)
+                CanvasUtils.drawOuterRing(dot, CVS_cdePreview.render.profile1.update(Color.rgba(dot.r, dot.g, dot.b, CDEUtils.mod(maxAlphaInit*.25, ratio)), "none", null, null, 1), 3)
+                if (enableGlow) CanvasUtils.drawOuterRing(dot, CVS_cdePreview.render.profile1.update(Color.rgba(dot.r, dot.g, dot.b, CDEUtils.mod(maxAlphaInit*.25, ratio)), "blur(2px)", null, null, 1), 3)// maybe laggy
+            }
+    
+            // DRAG
+            dot.setupResults(dot, mouse, dist, ratio)
+    
+            // BORDER POS RESET
+            if ((!CVS_cdePreview.isWithin(dot.pos, dot.radius+5) && dot.x > CVS_cdePreview.width/2) || dot.x < -50) {
+                dot.pos = [CDEUtils.random(-(20+dot.radius), CVS_cdePreview.width/2.15), CDEUtils.random(10, CVS_cdePreview.height*1.15)]
+            }
+    
+        }, null, (obj)=>{
+    
+        const effectCenterPos = CVS_cdePreview.getResponsivePos([0.5, 1.2])
+        obj.playAnim(new Anim((prog, i)=>{
+            obj.rotateAt(prog*360*rotationDir, effectCenterPos)
+            obj.scaleAt([fade(prog, i, 1, 2), fade(prog, i, 1, 2)], effectCenterPos)
+        }, -rotationTime))
+    
+    })
+}
+
+const backgroundStars1 = createStars(),
+      backgroundStars2 = createStars(40, 0.2, 5, 600000, [5000, 10000], false, 400, 0.1)
+
+CVS_cdePreview.add(backgroundStars1)
+CVS_cdePreview.add(backgroundStars2)
+
+// GROUND
+function createGround(heightPourcentile, groundColor, groundLineColor, dotSpacing=100) {
+    return new FilledShape(groundColor, true, [0, CVS_cdePreview.pct(heightPourcentile, false)],
+        [new Dot([0, CVS_cdePreview.height]), ...Shape.generate(Render.Y_FUNCTIONS.LINEAR(0), null, CVS_cdePreview.width+dotSpacing, dotSpacing, [-12.5, 12.5], (dot, lastDot)=>{
+            dot.addConnection(lastDot)
+
+        }), new Dot(CVS_cdePreview.size)],
+        3, groundLineColor, 100, (render, dot, ratio)=>{
+            CanvasUtils.drawDotConnections(dot, CVS_cdePreview_l2.render.profile1.update(groundLineColor, null, null, null, 3))
+            dot.radius = CDEUtils.mod(dot.getInitRadius()*2, ratio, dot.getInitRadius()*2*0.8)
+            dot.a = CDEUtils.mod(1, ratio, 0.8)
+        }, null, null, null, null, true
+    )
+}
+
+let ground1, ground2, ground3
+
+function generateGround() {
+    CVS_cdePreview_l2.add(ground1 = createGround(0.8, [14, 20, 53, 1], [84, 90, 133, 1]))
+    CVS_cdePreview_l2.add(ground2 = createGround(0.88, [12, 10, 43, 1], [57, 63, 110, 1], 70))
+    CVS_cdePreview_l2.add(ground3 = createGround(0.935, [4, 8, 35, 1], [44, 50, 93, 1], 157))
+}
+generateGround()
+
+// TREES
+const treeModifier = CDEUtils.random(0,1), treeSizeMin = 60, treeSizeMax = 80, treeModSize = 0.6, treeXMod = 0.91
+ground1.dots.forEach((dot)=>{
+    const treeModifier = CDEUtils.random(0,1),
+            tree = new ImageDisplay("./img/tree.svg", [-100,-100], [CDEUtils.random(treeXMod*treeSizeMin*(treeModifier||treeModSize), treeXMod*treeSizeMax*(treeModifier||treeModSize))+"%", CDEUtils.random(treeSizeMin*(treeModifier||treeModSize), treeSizeMax*(treeModifier||treeModSize))+"%"], null, (obj)=>{
+                obj.pos = CDEUtils.addPos(dot.pos, [0, -obj.size[1]/2-8])
+
+                obj.scaleAt([0.8, 1.01])
+                setTimeout(()=>{
+                    obj.playAnim(new Anim((prog, i)=>{
+                        obj.scaleAt([fade(prog, i, 0.8, 1.1), fade(prog, i, 1, 1.25)])
+                    }, -10000))
+                }, CDEUtils.random(0, 5000))
+
+            })
+    tree.opacity = treeModifier ? 0.65 : 0.3
+    CVS_cdePreview_l2.add(tree)
+})
+
+// TEXT
+TextStyles.loadCustomFont("fonts/BitcountPropSingle/BitcountPropSingle.ttf", "bitcountPropSingle")
+
+function createFancyLetter(text, pos, color=[225, 225, 255, 0]) {
+    return new TextDisplay(text, pos, color, CVS_cdePreview.render.textProfile1.update(TextStyles.getFontStyleDeclaration("bitcountPropSingle", "46px")), null, null, (obj)=>{
+
+        // Slow wobble effect
+        let distance = CDEUtils.random(-12, 14), duration = -CDEUtils.random(2000, 7000), iy = obj.y, ay = 0
+        setTimeout(()=>{
+            obj.playAnim(new Anim((prog, i)=>{
+                const dy = ((i%2)||-1)*distance*prog-ay
+                obj.y += dy
+                ay += dy
+
                 if (prog == 1) {
-                    iy = dot.y
+                    iy = obj.y
                     ay = 0
                 }
             }, duration, Anim.easeInOutQuad))
         }, CDEUtils.random(0, 2000))
-        dot.setupResults = CanvasUtils.getDraggableDotCB(true)
 
-    }), 0, [225, 225, 255, 0], 100, (render, dot, ratio, setupRes, mouse, dist, shape)=>{
+        obj.playAnim(new Anim((prog)=>{
+            obj.opacity = 1-prog
+        }, 14500, Anim.easeInSine, ()=>obj.remove()))
 
-        const nearestDots = getNearestDots(dot, shape), nd_ll = nearestDots.length, threshold = 100
-        for (let i=0;i<nd_ll;i++) {
-            const dotInfo = nearestDots[i]
-            if (dotInfo[1] > threshold) break
-            CanvasUtils.drawLine(dotInfo[0], dot, [225,225,255,CDEUtils.mod(dot.a-.15, dot.getRatio(dotInfo[1]))], 3)
-            CanvasUtils.drawOuterRing(dot, CVS_cdePreview.render.profile1.update(Color.rgba(dot.r, dot.g, dot.b, CDEUtils.mod(0.25, ratio)), "none", null, null, 1), 3)
-            CanvasUtils.drawOuterRing(dot, CVS_cdePreview.render.profile1.update(Color.rgba(dot.r, dot.g, dot.b, CDEUtils.mod(0.25, ratio)), "blur(2px)", null, null, 1), 3)// maybe laggy
-        }
+    }, (obj)=>{
+        // Opacity effect
+        obj.a = CDEUtils.mod(1, CDEUtils.clamp(CDEUtils.getDist(obj.x, obj.y, CVS_cdePreview.mouse.x, CVS_cdePreview.mouse.y)/200, 0, 1), 0.85)
+    })
+}
 
-        // DRAG
-        dot.setupResults(dot, mouse, dist, ratio)
+const text = "You can drag the stars!", letterWidth = createFancyLetter("O").getSize()[0], textWidth = 775, textStartPos = [(CVS_cdePreview.width-textWidth)/2, 200]
 
-        // BORDER POS RESET
-        if ((!CVS_cdePreview.isWithin(dot.pos, dot.radius+5) && dot.x > CVS_cdePreview.width/2) || dot.x < -50) {
-            dot.pos = [CDEUtils.random(-(20+dot.radius), CVS_cdePreview.width/2.15), CDEUtils.random(10, CVS_cdePreview.height*1.5)]
-        }
+for (let i=0;i<text.length;i++) {
+    CVS_cdePreview.add(createFancyLetter(text[i], CDEUtils.addPos(textStartPos, [letterWidth*i, 0])))
+}
 
-    }, null, (obj)=>{
+CVS_cdePreview.onResizeCB=()=>{
+    const newWidth = CVS_cdePreview.width
 
-    obj.playAnim(new Anim((prog, i) => {
-        obj.rotateAt(prog*360, CVS_cdePreview.getResponsivePos([0.5, 1.2]))
-    }, -110000))
-
-})
-
-
-/**
- * ADDING OBJECTS
- */
-CVS_cdePreview.add(backgroundStars)
-CVS_cdePreview.add(backgroundGradient)
+    backgroundGradient1.dots[1].x = newWidth
+    backgroundGradient1.dots[2].x = newWidth
+    backgroundGradient2.dots[1].x = newWidth
+    backgroundGradient2.dots[2].x = newWidth
+    backgroundGradient3.dots[1].x = newWidth
+    backgroundGradient3.dots[2].x = newWidth
+    
+    ground1.lastDot.x = newWidth
+    CDEUtils.getLast(ground1.dots, 1).x = newWidth
+    ground2.lastDot.x = newWidth
+    CDEUtils.getLast(ground2.dots, 1).x = newWidth
+    ground3.lastDot.x = newWidth
+    CDEUtils.getLast(ground3.dots, 1).x = newWidth
+}

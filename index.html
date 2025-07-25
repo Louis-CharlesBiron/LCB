@@ -70,12 +70,14 @@
                     </div>
 
                 </div>
-                <div class="ci_large" style="user-select: none;">
-                    <h2 class="ci_header">CanvasDotEffect (cdejs)</h2>
-                    <div class="ci_textContent">
+                <div class="ci_large" style="user-select: none;" id="angelToAdd3">
+                    <h2 id="angelToAdd1" class="ci_header verySmooth">CanvasDotEffect (cdejs)</h2>
+                    <div id="angelToAdd2" class="ci_textContent verySmooth">
                         CanvasDotEffect is a lightweight, fully native, JS library that helps create customizable and interactive dot-based effects using the Canvas API:
                     </div>
-                    <canvas id="cdePreview"></canvas>
+                    <button id="startCDEPreview" class="verySmooth">See a neat example?</button>
+                    <canvas id="cdePreview" class="verySmooth" style="opacity: 0;"></canvas>
+                    <canvas id="cdePreview_l2" class="verySmooth" style="z-index: 1; opacity: 0;"></canvas>
                 </div>
             </div>
 
@@ -229,7 +231,5 @@
     <script src="CDE/CDEManager.js" async></script>
     <script src="CDE/preview/PREVIEW.js" async></script>
     <script src="CDE/preview/ex1.js" async></script>
-    <script src="CDE/preview/ex2.js" async></script>
-    <script src="CDE/preview/ex3.js" async></script>
 </body>
 </html>

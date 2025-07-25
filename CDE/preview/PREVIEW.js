@@ -1,34 +1,17 @@
-const fpsCounter = new FPSCounter(), title = document.querySelector("title"), CVS_cdePreview = new Canvas(document.getElementById("cdePreview"), ()=>{
-    title.textContent = fpsCounter.getFps()+" fps"
-})
+const fpsCounter = new FPSCounter(), title = document.querySelector("title"), 
+      CVS_cdePreview = new Canvas(document.getElementById("cdePreview"), ()=>title.textContent = fpsCounter.getFps()+" fps"), 
+      CVS_cdePreview_l2 = new Canvas(document.getElementById("cdePreview_l2"), null, 30)
 
 
-
-
-
-
-
-
-
-
-
-
-createButton(CVS_cdePreview, "Scene 1", CVS_cdePreview.getResponsivePos([0.9, 0.45]), ()=>{
-
-}, [38, 38, 38, 1], "aliceblue")
-createButton(CVS_cdePreview, "Scene 2", CVS_cdePreview.getResponsivePos([0.9, 0.65]), ()=>{
-
-}, [38, 38, 38, 1], "aliceblue")
-createButton(CVS_cdePreview, "Scene 3", CVS_cdePreview.getResponsivePos([0.9, 0.85]), ()=>{
-
-}, [38, 38, 38, 1], "aliceblue")
-
-
-
-
-
-
-
+//createButton(CVS_cdePreview_l2, "Scene 1", CVS_cdePreview.getResponsivePos([0.9, 0.45]), ()=>{
+//
+//}, [38, 38, 38, 1], "aliceblue")
+//createButton(CVS_cdePreview_l2, "Scene 2", CVS_cdePreview.getResponsivePos([0.9, 0.65]), ()=>{
+//
+//}, [38, 38, 38, 1], "aliceblue")
+//createButton(CVS_cdePreview_l2, "Scene 3", CVS_cdePreview.getResponsivePos([0.9, 0.85]), ()=>{
+//
+//}, [38, 38, 38, 1], "aliceblue")
 
 
 /**
@@ -38,7 +21,23 @@ CVS_cdePreview.setMouseMove()
 CVS_cdePreview.setMouseLeave()
 CVS_cdePreview.setMouseDown()
 CVS_cdePreview.setMouseUp()
-CVS_cdePreview.start()
+
+CVS_cdePreview_l2.setMouseMove()
+CVS_cdePreview_l2.setMouseLeave()
+CVS_cdePreview_l2.setMouseDown()
+CVS_cdePreview_l2.setMouseUp()
+
+function CDEPreviewStart() {
+    CVS_cdePreview.start()
+    CVS_cdePreview_l2.start()
+}
+
+function CDEPreviewStop() {
+    CVS_cdePreview.stop()
+    CVS_cdePreview_l2.stop()
+}
+
+
 
 /**
  * UTILS 
