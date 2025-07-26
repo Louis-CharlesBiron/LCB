@@ -393,7 +393,49 @@ p {
     left: 1.5%;
     top: 21%;
 }
-#toggleCDEPreviewAudio:not([disabled]):hover {
+#toggleCDEPreviewAudio:not([disabled]):hover, .CDEPreviewSpeedParent:not([disabled]):hover {
     opacity: 1 !important;
 }
 
+.CDEPreviewSpeedParent {
+    position: absolute;
+    right: 2%;
+    top: 20%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    font-size: 0.85em;
+    letter-spacing: 1.5px;
+}
+
+#CDEPreviewSpeed{
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 10px;
+    background: rgb(var(--c5), 0.15);
+    border-radius: 20px;
+    margin-top: 5px;
+}
+#CDEPreviewSpeed::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width:  16px; 
+    height: 16px;
+    background-color: rgb(var(--c5), .7); 
+    border-radius: 100%;
+}
+
+#CDEPreviewSpeed::-moz-range-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px; 
+    height: 25px;
+    background-color: #04AA6D; 
+}
+
+#CDEPreviewSpeedValueDisplay {
+    font-size: 0.8em;
+    margin-top: 2px;
+}

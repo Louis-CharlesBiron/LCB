@@ -17,10 +17,16 @@ startCDEPreview.onclick=()=>{
     angelToAdd2.classList.add("angelicText")
     angelToAdd3.classList.add("angelicBox")
 
-    toggleCDEPreviewAudio.title = "Toggle audio"
+    toggleCDEPreviewAudio.title = "Toggle audio..."
     toggleCDEPreviewAudio.removeAttribute("disabled")
-    toggleCDEPreviewAudio.style.opacity = 0.35
+    toggleCDEPreviewAudio.style.opacity = 0.25
     toggleCDEPreviewAudio.style.cursor = "pointer"
+
+    CDEPreviewSpeed.removeAttribute("disabled")
+    CDEPreviewSpeed.style.cursor = "pointer"
+    CDEPreviewSpeed.parentElement.removeAttribute("disabled")
+    CDEPreviewSpeed.parentElement.style.opacity = 0.25
+    CDEPreviewSpeed.parentElement.title = "Modify generation speed..."
 
     setTimeout(()=>startCDEPreview.remove(),1000)
 
@@ -67,5 +73,12 @@ toggleCDEPreviewAudio.onmouseleave=()=>{
         backgroundAudioDisplay.playAnim(new Anim((prog)=>{
             backgroundAudioDisplay.a = CDEUtils.clamp((1-prog)*CDEPreviewAudioHoverOpacity, audioDisplayAlpha)
         }, 750, Anim.easeInOutQuad, ()=>CDEPreviewAudioHoverOpacity.a=audioDisplayAlpha))
+    }
+}
+
+// CDE preview generation speed
+CDEPreviewSpeed.oninput=()=>{
+    if (CVS_cdePreview) {
+        CDEPreviewSpeedValueDisplay.textContent = `(${CVS_cdePreview.speedModifier = +CDEPreviewSpeed.value}x)`
     }
 }

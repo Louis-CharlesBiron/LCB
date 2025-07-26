@@ -2,6 +2,8 @@ const fpsCounter = new FPSCounter(), title = document.querySelector("title"),
       CVS_cdePreview = new Canvas(document.getElementById("cdePreview"), ()=>title.textContent = fpsCounter.getFps()+" fps"), 
       CVS_cdePreview_l2 = new Canvas(document.getElementById("cdePreview_l2"), null, 30)
 
+Color.OPACITY_VISIBILITY_THRESHOLD = 0.001
+
 
 //createButton(CVS_cdePreview_l2, "Scene 1", CVS_cdePreview.getResponsivePos([0.9, 0.45]), ()=>{
 //

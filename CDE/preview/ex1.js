@@ -58,7 +58,7 @@ function generateGradients() {
 
 
 // STARS
-function createStars(gapX=30, maxAlphaInit=1, maxRadiusInit=10, rotationTime=120000, dotAnimDurationRange=[4000, 7000], enableGlow=true, limit=100, lineOpacitySubstractor=0.08, rotationDir=1) {
+function createStars(gapX=30, maxAlphaInit=1.15, maxRadiusInit=10, rotationTime=120000, dotAnimDurationRange=[4000, 7000], enableGlow=true, limit=100, lineOpacitySubstractor=0.08, rotationDir=1) {
     return new Shape([0,CVS_cdePreview.height/2],
         Shape.generate(null, [0,0], CVS_cdePreview.width, gapX, [-CVS_cdePreview.height/2, CVS_cdePreview.height/2], (dot)=>{
     
@@ -115,7 +115,7 @@ let backgroundStars1, backgroundStars2
 
 function generateStars() {
     backgroundStars1 = createStars(),
-    backgroundStars2 = createStars(40, 0.2, 5, 600000, [5000, 10000], false, 400, 0.1)
+    backgroundStars2 = createStars(40, 0.28, 5, 600000, [5000, 10000], false, 400, 0.1)
 
     CVS_cdePreview.add(backgroundStars1)
     CVS_cdePreview.add(backgroundStars2)
@@ -153,7 +153,7 @@ const treeModifier = CDEUtils.random(0,1), treeSizeMin = 60, treeSizeMax = 80, t
 function generateTrees() {
     ground1.dots.forEach((dot)=>{
         const treeModifier = CDEUtils.random(0,1),
-                tree = new ImageDisplay("./img/tree.svg", [100,100], [CDEUtils.random(treeXMod*treeSizeMin*(treeModifier||treeModSize), treeXMod*treeSizeMax*(treeModifier||treeModSize))+"%", CDEUtils.random(treeSizeMin*(treeModifier||treeModSize), treeSizeMax*(treeModifier||treeModSize))+"%"], null, (obj)=>{
+                tree = new ImageDisplay("img/aTree.svg", [100,100], [CDEUtils.random(treeXMod*treeSizeMin*(treeModifier||treeModSize), treeXMod*treeSizeMax*(treeModifier||treeModSize))+"%", CDEUtils.random(treeSizeMin*(treeModifier||treeModSize), treeSizeMax*(treeModifier||treeModSize))+"%"], null, (obj)=>{
                     obj.pos = CDEUtils.addPos(dot.pos, [0, -obj.size[1]/2-8])
                     obj.scaleAt([0.8, 1.01])
                     setTimeout(()=>{
@@ -169,6 +169,33 @@ function generateTrees() {
 }
 
 
+// MOON
+let moon1, moon2
+function generateMoon() {
+    moon1 = new ImageDisplay("img/CDEBG.svg", null, null, null, (obj)=>{
+        obj.pos = CDEUtils.addPos(CVS_cdePreview.getCenter(), [-obj.size[0]/2, -CVS_cdePreview.height/2])
+        
+        obj.playAnim(new Anim((prog, i)=>{
+            obj.scaleAt([fade(prog, i, 0.86, 1.3), fade(prog, i, 0.86, 1.3)])
+            obj.rotateAt(-90+prog*360)
+            obj.opacity = fade(prog, i, 0.0325, 0.05)
+        }, -75000))
+    })
+
+    moon2 = new ImageDisplay("img/CDEBG.svg", null, null, null, (obj)=>{
+        obj.pos = CDEUtils.addPos(CVS_cdePreview.getCenter(), [-obj.size[0]/2, -CVS_cdePreview.height/2])
+        
+        obj.playAnim(new Anim((prog, i)=>{
+            obj.scaleAt([fade(prog, i, 1.2, 1.8), fade(prog, i, 1.2, 1.8)])
+            obj.rotateAt(prog*360)
+            obj.opacity = fade(prog, i, 0.015, 0.0365)
+        }, -75000))
+    })
+    
+    moon1.opacity = moon2.opacity = 0
+    CVS_cdePreview.add(moon1)
+    CVS_cdePreview.add(moon2)
+}
 
 
 // TEXT
@@ -226,6 +253,7 @@ function generateCDEPreview() {
     generateTrees()
     generateText()
     generateAudioDisplay()
+    generateMoon()
 }
 
 
