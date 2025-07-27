@@ -1,5 +1,5 @@
 const CVS_cdePreview_fpsCounter = new FPSCounter(), title = document.querySelector("title"), 
-      CVS_cdePreview = new Canvas(document.getElementById("cdePreview"), ()=>title.textContent = CVS_cdePreview_fpsCounter.getFps()+" fps"), 
+      CVS_cdePreview = new Canvas(document.getElementById("cdePreview"), ()=>title.textContent = CVS_cdePreview_fpsCounter.getFps()+" fps"), // TODO REMOVE FPS
       CVS_cdePreview_l2 = new Canvas(document.getElementById("cdePreview_l2"), null, 30)
 
 Color.OPACITY_VISIBILITY_THRESHOLD = 0.001
