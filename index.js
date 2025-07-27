@@ -6,32 +6,44 @@ goToTop.onclick=()=>document.documentElement.scrollTo(0, 0)
 ageEl.textContent = getAge(2005)
 
 // Start CDE preview
+let cdePreviewStarted = false
 startCDEPreview.onclick=()=>{
-    cdePreview.style.opacity = 1
-    cdePreview_l2.style.opacity = 1
-    startCDEPreview.style.opacity = 0
+    if (!cdePreviewStarted) {
+        cdePreviewStarted = true
 
-    angelToAdd1.style.borderBottom = "5px solid rgb(var(--c2), 0)"
+        cdePreview.style.opacity = 1
+        cdePreview_l2.style.opacity = 1
+        startCDEPreview.style.opacity = 0
 
-    angelToAdd1.classList.add("angelicText")
-    angelToAdd2.classList.add("angelicText")
-    angelToAdd3.classList.add("angelicBox")
+        angelToAdd1.style.borderBottom = "5px solid rgb(var(--c2), 0)"
 
-    toggleCDEPreviewAudio.title = "Toggle audio..."
-    toggleCDEPreviewAudio.removeAttribute("disabled")
-    toggleCDEPreviewAudio.style.opacity = 0.25
-    toggleCDEPreviewAudio.style.cursor = "pointer"
+        angelToAdd1.classList.add("angelicText")
+        angelToAdd2.classList.add("angelicText")
+        angelToAdd3.classList.add("angelicBox")
 
-    CDEPreviewSpeed.removeAttribute("disabled")
-    CDEPreviewSpeed.style.cursor = "pointer"
-    CDEPreviewSpeed.parentElement.removeAttribute("disabled")
-    CDEPreviewSpeed.parentElement.style.opacity = 0.25
-    CDEPreviewSpeed.parentElement.title = "Modify generation speed..."
+        toggleCDEPreviewAudio.title = "Toggle audio..."
+        toggleCDEPreviewAudio.removeAttribute("disabled")
+        toggleCDEPreviewAudio.style.opacity = 0.25
+        toggleCDEPreviewAudio.style.cursor = "pointer"
 
-    setTimeout(()=>startCDEPreview.remove(),1000)
+        CDEPreviewSpeed.removeAttribute("disabled")
+        CDEPreviewSpeed.style.cursor = "pointer"
+        CDEPreviewSpeed.parentElement.removeAttribute("disabled")
+        CDEPreviewSpeed.parentElement.style.opacity = 0.25
+        CDEPreviewSpeed.parentElement.title = "Modify generation speed..."
 
-    generateCDEPreview()
-    CDEPreviewStart()
+        setTimeout(()=>startCDEPreview.remove(),1000)
+
+        noTimeoutInterval(()=>{
+            CVS_cdePreview.fpsLimit = null
+            CVS_cdePreview_fpsCounter.runRecommendedFPSEvaluation((results)=>{
+                CVS_cdePreview.fpsLimit = Math.max(60, results.recommendedValue)
+            }, 5000, 5, false)
+        }, 20000)
+
+        generateCDEPreview()
+        CDEPreviewStart()
+    }
 }
 
 // Img to text example's original image

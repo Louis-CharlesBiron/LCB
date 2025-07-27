@@ -18,6 +18,10 @@ function getInputRegulationCB(callback, msDelay) {
         timeout = setTimeout(()=>callback(), msDelay)
     }
 }
+function noTimeoutInterval(callback, delay) {
+    callback()
+    return setInterval(callback, delay)
+}
 
 
 // GRADIENT
@@ -180,7 +184,7 @@ function generateMoon() {
             obj.rotateAt(-90+prog*360)
             obj.opacity = fade(prog, i, 0.0325, 0.05)
         }, -75000))
-    })
+    }, null, null, true)
 
     moon2 = new ImageDisplay("img/CDEBG.svg", null, null, null, (obj)=>{
         obj.pos = CDEUtils.addPos(CVS_cdePreview.getCenter(), [-obj.size[0]/2, -CVS_cdePreview.height/2])
@@ -190,7 +194,7 @@ function generateMoon() {
             obj.rotateAt(prog*360)
             obj.opacity = fade(prog, i, 0.015, 0.0365)
         }, -75000))
-    })
+    }, null, null, true)
     
     moon1.opacity = moon2.opacity = 0
     CVS_cdePreview.add(moon1)
@@ -259,19 +263,24 @@ function generateCDEPreview() {
 
 // RESIZE ADJUSTMENTS
 CVS_cdePreview.onResizeCB=()=>{
-    const newWidth = CVS_cdePreview.width
+    if (CVS_cdePreview.hasBeenStarted) {
+        const newWidth = CVS_cdePreview.width
 
-    backgroundGradient1.dots[1].x = newWidth
-    backgroundGradient1.dots[2].x = newWidth
-    backgroundGradient2.dots[1].x = newWidth
-    backgroundGradient2.dots[2].x = newWidth
-    backgroundGradient3.dots[1].x = newWidth
-    backgroundGradient3.dots[2].x = newWidth
-    
-    ground1.lastDot.x = newWidth
-    CDEUtils.getLast(ground1.dots, 1).x = newWidth
-    ground2.lastDot.x = newWidth
-    CDEUtils.getLast(ground2.dots, 1).x = newWidth
-    ground3.lastDot.x = newWidth
-    CDEUtils.getLast(ground3.dots, 1).x = newWidth
+        backgroundGradient1.dots[1].x = newWidth
+        backgroundGradient1.dots[2].x = newWidth
+        backgroundGradient2.dots[1].x = newWidth
+        backgroundGradient2.dots[2].x = newWidth
+        backgroundGradient3.dots[1].x = newWidth
+        backgroundGradient3.dots[2].x = newWidth
+        
+        ground1.lastDot.x = newWidth
+        CDEUtils.getLast(ground1.dots, 1).x = newWidth
+        ground2.lastDot.x = newWidth
+        CDEUtils.getLast(ground2.dots, 1).x = newWidth
+        ground3.lastDot.x = newWidth
+        CDEUtils.getLast(ground3.dots, 1).x = newWidth
+
+        moon1.moveAt(CDEUtils.addPos(CVS_cdePreview.getCenter(), [-moon1.size[0]/2, -CVS_cdePreview.height/2]))
+        moon2.moveAt(CDEUtils.addPos(CVS_cdePreview.getCenter(), [-moon2.size[0]/2, -CVS_cdePreview.height/2]))
+    }
 }

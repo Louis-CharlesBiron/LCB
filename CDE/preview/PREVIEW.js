@@ -1,19 +1,8 @@
-const fpsCounter = new FPSCounter(), title = document.querySelector("title"), 
-      CVS_cdePreview = new Canvas(document.getElementById("cdePreview"), ()=>title.textContent = fpsCounter.getFps()+" fps"), 
+const CVS_cdePreview_fpsCounter = new FPSCounter(), title = document.querySelector("title"), 
+      CVS_cdePreview = new Canvas(document.getElementById("cdePreview"), ()=>title.textContent = CVS_cdePreview_fpsCounter.getFps()+" fps"), 
       CVS_cdePreview_l2 = new Canvas(document.getElementById("cdePreview_l2"), null, 30)
 
 Color.OPACITY_VISIBILITY_THRESHOLD = 0.001
-
-
-//createButton(CVS_cdePreview_l2, "Scene 1", CVS_cdePreview.getResponsivePos([0.9, 0.45]), ()=>{
-//
-//}, [38, 38, 38, 1], "aliceblue")
-//createButton(CVS_cdePreview_l2, "Scene 2", CVS_cdePreview.getResponsivePos([0.9, 0.65]), ()=>{
-//
-//}, [38, 38, 38, 1], "aliceblue")
-//createButton(CVS_cdePreview_l2, "Scene 3", CVS_cdePreview.getResponsivePos([0.9, 0.85]), ()=>{
-//
-//}, [38, 38, 38, 1], "aliceblue")
 
 
 /**
