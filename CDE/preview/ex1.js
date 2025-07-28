@@ -13,9 +13,9 @@ function getNearestDots(dot, shape) {
 }
 function getInputRegulationCB(callback, msDelay) {
     let timeout
-    return ()=>{
+    return (...params)=>{
         clearTimeout(timeout)
-        timeout = setTimeout(()=>callback(), msDelay)
+        timeout = setTimeout(()=>callback(...params), msDelay)
     }
 }
 function noTimeoutInterval(callback, delay) {

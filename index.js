@@ -94,3 +94,49 @@ CDEPreviewSpeed.oninput=()=>{
         CDEPreviewSpeedValueDisplay.textContent = `(${CVS_cdePreview.speedModifier = +CDEPreviewSpeed.value}x)`
     }
 }
+
+// In Stasis img carrousel
+let ISImgCarrousel_i = 0, ISImgCarrousel_images = ["img/cool.png", "img/cool2.png", "img/cool3.png", "img/cool4.png", "img/cool5.png"], ISImgCarrousel_images_ll = ISImgCarrousel_images.length
+
+function updateCarrousel(indexIncrement) {
+    inStasisImages.style.backgroundImage = `url(${ISImgCarrousel_images[ISImgCarrousel_i=(ISImgCarrousel_i+indexIncrement<0?ISImgCarrousel_images_ll-1:ISImgCarrousel_i+indexIncrement)%ISImgCarrousel_images_ll]})`
+}
+
+inStasisImagesGoLeft.onclick=()=>updateCarrousel(-1)
+inStasisImagesGoRight.onclick=()=>updateCarrousel(1)
+
+setInterval(()=>updateCarrousel(1), 8000)
+
+// Toggle In Stasis images
+let ISImg_shown = true
+toggleInStasisImages.onclick=()=>{
+    if (ISImg_shown = !ISImg_shown) {
+        toggleInStasisImages.src = "img/X.svg"
+        inStasisImages.style.opacity = 1
+        textUnderlayToggle1.classList.add("textUnderlay")
+        textUnderlayToggle2.classList.add("textUnderlay")
+        inStasisImagesGoSomewhere.style.display = "flex"
+    } else {
+        toggleInStasisImages.src = "img/play.svg"
+        inStasisImages.style.opacity = 0
+        textUnderlayToggle1.classList.remove("textUnderlay")
+        textUnderlayToggle2.classList.remove("textUnderlay")
+        inStasisImagesGoSomewhere.style.display = "none"
+    }
+}
+
+
+// Position image descriptions
+function positionImageDescriptions(preventRecall) {
+    document.querySelectorAll(".imageDescription").forEach(el=>{
+        const parentImg = el.previousElementSibling, parentImgBCR = parentImg.getBoundingClientRect(), elBCR = el.getBoundingClientRect()
+        el.style.width = parentImgBCR.width-14+"px"
+        el.style.left = parentImgBCR.x+(parentImgBCR.width/2)-((parentImgBCR.width-14)/2)+"px"
+        el.style.bottom = -10-elBCR.height+"px"
+        console.log("A", preventRecall)
+        if (!preventRecall) setTimeout(()=>positionImageDescriptions(true),700)
+    })
+}positionImageDescriptions()
+
+const imageDescPositionDelay = getInputRegulationCB(()=>positionImageDescriptions(), 250)
+window.addEventListener("resize",imageDescPositionDelay)
