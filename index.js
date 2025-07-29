@@ -133,7 +133,6 @@ function positionImageDescriptions(preventRecall) {
         el.style.width = parentImgBCR.width-14+"px"
         el.style.left = parentImgBCR.x+(parentImgBCR.width/2)-((parentImgBCR.width-14)/2)+"px"
         el.style.bottom = -10-elBCR.height+"px"
-        console.log("A", preventRecall)
         if (!preventRecall) setTimeout(()=>positionImageDescriptions(true),700)
     })
 }positionImageDescriptions()

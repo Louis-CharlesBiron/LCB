@@ -26,7 +26,7 @@ button {cursor: pointer}
     outline: none;
 }
 
-::selection {background-color: rgba(56, 56, 56, 0.25)}
+::selection {background-color: rgba(56, 56, 56, 0.35)}
 
 *::-webkit-scrollbar {width: 10px;}
 *::-webkit-scrollbar-track {background: rgb(var(--c2));}
@@ -35,8 +35,6 @@ button {cursor: pointer}
 
 input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {-webkit-appearance: none; margin: 0;}input[type="number"] {-moz-appearance: textfield;}
 input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type="password"]::-webkit-credentials-auto-fill-button,input[type="password"]::-webkit-password-reveal-button {display:none !important;}
-
-/**/
 
 .main {
     width: 100%;
