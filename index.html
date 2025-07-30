@@ -26,7 +26,6 @@
             <div class="wall section anchored highlightable" id="about" style="user-select: none;">
                 <canvas id="cvs1"></canvas>
                 <div class="wall_textContent" style="justify-content: space-evenly">
-                    <h2 style="margin: 0;">About me:</h2>
                     <div class="aboutFlex">
                         <div class="aboutSection">
                             <p>
@@ -34,11 +33,11 @@
                             </p>
                         </div>
                         <div class="aboutSection">
-                            <span class="highlightable">- I like coding!</span>
-                            <span class="highlightable">- I like bouldering / calisthenics!</span>
-                            <span class="highlightable">- I like Geometry Dash / art!</span>
-                            <span class="highlightable">- I like working on projects on stuff I like!</span>
-                            <span class="highlightable">- I like to make stuff myself!</span>
+                            <span class="highlightable">I like coding!</span>
+                            <span class="highlightable">I like bouldering / calisthenics!</span>
+                            <span class="highlightable">I like Geometry Dash / art!</span>
+                            <span class="highlightable">I like working on projects on stuff I like!</span>
+                            <span class="highlightable">I like to make stuff myself!</span>
                         </div>
                     </div>
 
@@ -64,7 +63,7 @@
                 ↓ Biggest Projects ↓
             </div>
 
-            <div class="coolInfo section">
+            <div class="coolInfo section mobileSpacing">
                 <div class="ci_small highlightable">
                     <h2 class="ci_header">- PROGRAMMING -</h2>
                     <div class="ci_details">
@@ -101,7 +100,7 @@
             </div>
 
 
-            <div class="coolInfo section">
+            <div class="coolInfo section mobileInvertFlex mobileSpacing">
                 <div class="ci_large highlightable">
                     <h2 class="ci_header">ImgToText</h2>
                     <div class="ci_textContent">
@@ -133,7 +132,7 @@
             </div>
 
 
-            <div class="coolInfo section">
+            <div class="coolInfo section mobileSpacing">
                 <div class="ci_small highlightable">
                     <h2 class="ci_header">- DIGITAL ARTS -</h2>
                     <div class="ci_details">
@@ -179,8 +178,14 @@
 
 
             <div class="header section highlightable">
+                <canvas id="CVS_dvd"></canvas>
                 Some other stuff!
                 <span class="smallText">Welcome to my other stuff!</span>
+            </div>
+
+            <div id="dvdEditor" class="verySmooth">
+                <textarea type="text" id="dvdTextInput" placeholder="Click me!" maxlength="100" disabled></textarea>
+                <img id="closeDvdEditor" src="img/X.svg" disabled></img>
             </div>
 
             <div class="miniwall section highlightable">
@@ -257,7 +262,7 @@
     <script src="index.js" async></script>
 
     <script src="CDE/CDEManager.js" async></script>
-    <script src="CDE/preview/PREVIEW.js" async></script>
-    <script src="CDE/preview/ex1.js" async></script>
+    <script src="CDE/PREVIEW.js" async></script>
+    <script src="CDE/dvd.js" async></script>
 </body>
 </html>

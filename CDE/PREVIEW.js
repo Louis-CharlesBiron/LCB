@@ -1,3 +1,9 @@
+const CVS_cdePreview_fpsCounter = new FPSCounter(), title = document.querySelector("title"), 
+      CVS_cdePreview = new Canvas(document.getElementById("cdePreview"), ()=>title.textContent = CVS_cdePreview_fpsCounter.getFps()+" fps"), // TODO REMOVE FPS
+      CVS_cdePreview_l2 = new Canvas(document.getElementById("cdePreview_l2"), null, 30)
+
+Color.OPACITY_VISIBILITY_THRESHOLD = 0.001
+
 // TODO, put in Utils
 function fade(prog, i, minValue=0, maxValue=5) {
     maxValue -= minValue
@@ -205,8 +211,9 @@ function generateMoon() {
 // TEXT
 TextStyles.loadCustomFont("fonts/BitcountPropSingle/BitcountPropSingle.ttf", "bitcountPropSingle")
 
-function createFancyLetter(text, pos, color=[225, 225, 255, 0]) {
-    return new TextDisplay(text, pos, color, CVS_cdePreview.render.textProfile1.update(TextStyles.getFontStyleDeclaration("bitcountPropSingle", "46px")), null, null, (obj)=>{
+function createFancyLetter(text, pos, color, isMobileVersion) {
+    color??=[225, 225, 255, 0]
+    return new TextDisplay(text, pos, color, CVS_cdePreview.render.textProfile1.update(TextStyles.getFontStyleDeclaration("bitcountPropSingle", isMobileVersion ? "22px" : "46px")), null, null, (obj)=>{
 
         // Slow wobble effect
         let distance = CDEUtils.random(-12, 14), duration = -CDEUtils.random(2000, 7000), iy = obj.y, ay = 0
@@ -229,13 +236,13 @@ function createFancyLetter(text, pos, color=[225, 225, 255, 0]) {
 
     }, (obj)=>{
         // Opacity effect
-        obj.a = CDEUtils.mod(1, CDEUtils.clamp(CDEUtils.getDist(obj.x, obj.y, CVS_cdePreview.mouse.x, CVS_cdePreview.mouse.y)/200, 0, 1), 0.85)
+        obj.a = CDEUtils.mod(1, CDEUtils.clamp(CDEUtils.getDist(obj.x, obj.y, CVS_cdePreview.mouse.x, CVS_cdePreview.mouse.y)/200, 0, 1), isMobileVersion ? 0.65 : 0.85)
     })
 }
 
 function generateText() {
-    const text = "You can drag the stars!", letterWidth = createFancyLetter("O").getSize()[0], textWidth = 775, textStartPos = [(CVS_cdePreview.width-textWidth)/2, 200]
-    for (let i=0;i<text.length;i++) CVS_cdePreview.add(createFancyLetter(text[i], CDEUtils.addPos(textStartPos, [letterWidth*i, 0])))
+    const isMobileVersion = CVS_cdePreview.width <= 430, text = "You can drag the stars!", letterWidth = createFancyLetter("O", null, null, isMobileVersion).getSize()[0], textWidth = isMobileVersion ? 375 : 775, textStartPos = [(CVS_cdePreview.width-textWidth)/2, 200]
+    for (let i=0;i<text.length;i++) CVS_cdePreview.add(createFancyLetter(text[i], CDEUtils.addPos(textStartPos, [letterWidth*i, 0]), null, isMobileVersion))
 }
 
 
@@ -281,4 +288,71 @@ CVS_cdePreview.onResizeCB=()=>{
         moon1.moveAt(CDEUtils.addPos(CVS_cdePreview.getCenter(), [-moon1.size[0]/2, -CVS_cdePreview.height/2]))
         moon2.moveAt(CDEUtils.addPos(CVS_cdePreview.getCenter(), [-moon2.size[0]/2, -CVS_cdePreview.height/2]))
     }
+}
+
+
+/**
+ * CANVAS START
+*/
+CVS_cdePreview.setMouseMove()
+CVS_cdePreview.setMouseLeave()
+CVS_cdePreview.setMouseDown()
+CVS_cdePreview.setMouseUp()
+
+CVS_cdePreview_l2.setMouseMove()
+CVS_cdePreview_l2.setMouseLeave()
+CVS_cdePreview_l2.setMouseDown()
+CVS_cdePreview_l2.setMouseUp()
+
+function CDEPreviewStart() {
+    CVS_cdePreview.start()
+    CVS_cdePreview_l2.start()
+}
+
+function CDEPreviewStop() {
+    CVS_cdePreview.stop()
+    CVS_cdePreview_l2.stop()
+}
+
+
+
+/**
+ * UTILS 
+*/
+
+function createButton(CVS, text="Button", pos=CVS.getCenter(), onClickCB, fillColor="aliceblue", textColor="red", padding=[20, 30]) {
+    // Creating the button's text
+    const textDisplay = new TextDisplay(text, [0,0], textColor, _, _, _, (self)=>{// setupCB
+        // Creating and adding to the canvas the button's box/background according to the text's size
+        const [width, height] = self.trueSize, w = width/2+padding[1]/2, h = height/2+padding[0]/2,
+              button = CVS.add(new FilledShape(fillColor, true, pos, [new Dot([-w,-h]),new Dot([w,-h]),new Dot([w,h]),new Dot([-w,h])], 0, fillColor, _, _, _, _, _, _, true))
+
+        // Button visual changes
+        const opacity = {default:1, hover: 0.75, click:0.5},
+        hoverHandler=(hover)=>{
+            // Updating the button's opacity and cursor style when mouse is
+            button.fillColorObject.a = hover ? opacity.hover : opacity.default
+            CVS.setCursorStyle(hover ? Canvas.CURSOR_STYLES.POINTER : Canvas.CURSOR_STYLES.DEFAULT)
+        },
+        clickHandler=(click)=>{
+            // Updating the button's opacity and calling the custom click callback
+            button.fillColorObject.a = click ? opacity.click : opacity.hover
+            if (click && CDEUtils.isFunction(onClickCB)) onClickCB(button, self)
+        }
+
+        // Button listeners
+        CVS.mouse.addListener(button, Mouse.LISTENER_TYPES.DOWN, ()=>clickHandler(true))
+        CVS.mouse.addListener(button, Mouse.LISTENER_TYPES.UP, ()=>clickHandler(false))
+        CVS.mouse.addListener(button, Mouse.LISTENER_TYPES.ENTER, ()=>hoverHandler(true))
+        CVS.mouse.addListener(button, Mouse.LISTENER_TYPES.LEAVE, ()=>hoverHandler(false))
+
+        // making the button available in the text's setupResults
+        return button
+    }, _, self=>self.setupResults)
+    
+    // Adding the text to the canvas
+    CVS.add(textDisplay)
+
+    // Returning the button and text objects
+    return [textDisplay.setupResults, textDisplay]
 }

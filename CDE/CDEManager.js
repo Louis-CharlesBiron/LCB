@@ -3,11 +3,13 @@ const _=null//, {Canvas, Shape, Dot, CDEUtils, CanvasUtils, Render, _Obj, TextDi
 
 const CVS1 = new Canvas(document.getElementById("cvs1")), render1 = CVS1.render, random = CDEUtils.random
 
+CVS1.mobileScrollingState = Canvas.MOBILE_SCROLLING_STATES.ALWAYS
+
 
 
 // BORDER EFFECT
 function getBorderPaths() {
-    const periodCount = random(5, 15), height = random(40, 65), startY = random(5, 25)
+    const periodCount = random(5, 15), height = random(40, 60), startY = random(5, 25)
     return {
         path1:Render.generate([0,startY], Render.Y_FUNCTIONS.SINUS(height, CVS1.width/periodCount), CVS1.width, 20),
         path2:Render.generate([random(-3, 3),startY+random(-2, 2)], Render.Y_FUNCTIONS.SINUS(height, CVS1.width/periodCount), CVS1.width, 20),
@@ -41,3 +43,8 @@ CVS1.setMouseDown(()=>{
 })
 CVS1.setMouseUp()
 CVS1.start()
+
+// RESIZE ADJUSTMENTS
+CVS1.onResizeCB=()=>{
+    loop1Obj.setupResults = getBorderPaths()
+}

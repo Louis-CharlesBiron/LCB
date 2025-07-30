@@ -208,6 +208,19 @@ class CDEUtils {
         if (arr1.length !== arr2.length) return false
         return arr1.every((v, i)=>v==arr2[i])
     }
+
+        /**
+     * Fades a numeric value according to Anim progress and playCount
+     * @param {Number} prog: an Anim instance's progress
+     * @param {Number?} i: an Anin instance's play count. (Controls the direction of the fading animation)
+     * @param {Number?} minValue: the minimal value to reach
+     * @param {Number?} maxValue: the maximal value to reach
+     * @returns the calculated number
+     */
+        static fade(prog, i=0, minValue=0, maxValue=5) {
+            maxValue -= minValue
+            return i%2?minValue+maxValue*(1-prog):minValue+maxValue*prog
+        }
     
     /**
      * Adds a pos to another
@@ -3846,7 +3859,7 @@ class Canvas {
         this._mouse.checkValid()
         if (CDEUtils.isFunction(callback)) callback(this._mouse, e)
     }
-    
+
 
     /**
      * Defines the onmousemove listener
@@ -3870,7 +3883,6 @@ class Canvas {
                 const touches = e.touches, time = this.timeStamp
                 if (time-lastEventTime > this._mouseMoveThrottlingDelay && touches.length==1) {
                     lastEventTime = time
-                    e.preventDefault()
                     e.x = CDEUtils.round(touches[0].clientX, 1)
                     e.y = CDEUtils.round(touches[0].clientY, 1)
                     this._mouse.updatePos(e.x, e.y, this._offset)
@@ -3911,6 +3923,13 @@ class Canvas {
         if (!preventOnFirstInteractionTrigger && Canvas.#ON_FIRST_INTERACT_CALLBACKS) Canvas.#onFirstInteraction(e)
     }
 
+    static MOBILE_SCROLLING_STATES = {DISABLED:0, IF_CANVAS_STOPPED:1, ALWAYS:2}
+    #mobileScrollingState = Canvas.MOBILE_SCROLLING_STATES.IF_CANVAS_STOPPED
+    
+    get mobileScrollingState() {return this.#mobileScrollingState}
+    
+    set mobileScrollingState(state) {this.#mobileScrollingState = state}
+
     /**
      * Defines the onmousedown listener
      * @param {Function} callback: a function called on event. (mouse, event)=>{...}
@@ -3924,7 +3943,8 @@ class Canvas {
                 isTouch = true
                 const touches = e.touches
                 if (touches.length==1) {
-                    e.preventDefault()
+                    const scrollState = this.#mobileScrollingState
+                    if (e.cancelable && (!scrollState || (scrollState==1 && this._state == Canvas.STATES.LOOPING))) e.preventDefault()
                     e.x = CDEUtils.round(touches[0].clientX, 1)
                     e.y = CDEUtils.round(touches[0].clientY, 1)
                     e.button = 0
@@ -3959,16 +3979,12 @@ class Canvas {
                 isTouch = true
                 const changedTouches = e.changedTouches
                 if (!e.touches.length) {
-                    e.preventDefault()
                     e.x = CDEUtils.round(changedTouches[0].clientX, 1)
                     e.y = CDEUtils.round(changedTouches[0].clientY, 1)
                     e.button = 0
                     this.#mouseClicks(callback, e)
-
-                    this._mouse.invalidate()
-                    e.x = Infinity
-                    e.y = Infinity
                     this.#mouseMovements(callback, e)
+                    setTimeout(()=>this._mouse.invalidate())
                 }     
             }, onmouseup=e=>{
                 if (!isTouch) this.#mouseClicks(callback, e)

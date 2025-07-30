@@ -7,7 +7,7 @@ ageEl.textContent = getAge(2005)
 
 // Start CDE preview
 let cdePreviewStarted = false
-startCDEPreview.onclick=()=>{
+startCDEPreview.onpointerup=()=>{
     if (!cdePreviewStarted) {
         cdePreviewStarted = true
 
@@ -47,7 +47,7 @@ startCDEPreview.onclick=()=>{
 }
 
 // Img to text example's original image
-textImg.onclick=(e)=>{
+textImg.onpointerup=(e)=>{
     e.preventDefault()
     if (e.ctrlKey) window.open("https://thumbs.dreamstime.com/b/bright-pixel-art-sunflower-vector-format-retro-bit-floral-illustration-digital-decor-summer-themes-vintage-design-320809663.jpg", "_blank")
 }
@@ -63,7 +63,7 @@ document.onkeyup=e=>{
 }
 
 // Toggle CDE preview audio
-toggleCDEPreviewAudio.onclick=()=>{
+toggleCDEPreviewAudio.onpointerup=()=>{
     if (backgroundAudioDisplay) {
         const hasAudioCurrently = !backgroundAudioDisplay.disableAudio
         toggleCDEPreviewAudio.src = hasAudioCurrently ? "img/volume_off.svg" : "img/volume_up.svg"
