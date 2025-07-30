@@ -11,19 +11,19 @@
     <div class="main">
 
         <div class="navbar">
-            <a id="goToTop">Top ↑</a>
-            <a href="#about">About me</a>
-            <a href="#projects">Projects</a>
-            <a href="https://embelliron.com/lcb_tests/clib/lib/index.html" target="_blank">Utils</a>
+            <a class="highlightable" id="goToTop">Top ↑</a>
+            <a class="highlightable" href="#about">About me</a>
+            <a class="highlightable" href="#projects">Projects</a>
+            <a class="highlightable" href="https://embelliron.com/lcb_tests/clib/lib/index.html" target="_blank">Utils</a>
         </div>
 
         <div class="content">
-            <div class="header section">
+            <div class="header section highlightable">
                 Hey there!
                 <span class="smallText">Welcome to my stuff</span>
             </div>
 
-            <div class="wall section anchored" id="about" style="user-select: none;">
+            <div class="wall section anchored highlightable" id="about" style="user-select: none;">
                 <canvas id="cvs1"></canvas>
                 <div class="wall_textContent" style="justify-content: space-evenly">
                     <h2 style="margin: 0;">About me:</h2>
@@ -34,38 +34,38 @@
                             </p>
                         </div>
                         <div class="aboutSection">
-                            <span>- I like coding!</span>
-                            <span>- I like bouldering / calisthenics!</span>
-                            <span>- I like Geometry Dash / art!</span>
-                            <span>- I like working on projects on stuff I like!</span>
-                            <span>- I like to make stuff myself!</span>
+                            <span class="highlightable">- I like coding!</span>
+                            <span class="highlightable">- I like bouldering / calisthenics!</span>
+                            <span class="highlightable">- I like Geometry Dash / art!</span>
+                            <span class="highlightable">- I like working on projects on stuff I like!</span>
+                            <span class="highlightable">- I like to make stuff myself!</span>
                         </div>
                     </div>
 
                 </div>
             </div>
 
-            <div class="links">
+            <div class="links highlightable">
                 <div class="linksContent">
                     <div>
-                        <span><img width="32px" src="img/github.png" alt="github icon"><a href="https://github.com/Louis-CharlesBiron" target="_blank">My Github Account</a></span>
-                        <span><img width="32px" src="img/youtube.png" alt="yt icon"><a href="https://www.youtube.com/@lcb79" target="_blank">My Youtube Channel</a></span>
-                        <span><img width="32px" src="img/linkedin.png" alt="linkedin icon"><a href="https://www.linkedin.com/in/louis-charles-biron-6a44ba2b5?trk=contact-info" target="_blank">My LinkdedIn Page</a></span>
+                        <span class="highlightable"><img width="32px" src="img/github.png" alt="github icon"><a href="https://github.com/Louis-CharlesBiron" target="_blank">My Github Account</a></span>
+                        <span class="highlightable"><img width="32px" src="img/youtube.png" alt="yt icon"><a href="https://www.youtube.com/@lcb79" target="_blank">My Youtube Channel</a></span>
+                        <span class="highlightable"><img width="32px" src="img/linkedin.png" alt="linkedin icon"><a href="https://www.linkedin.com/in/louis-charles-biron-6a44ba2b5?trk=contact-info" target="_blank">My LinkdedIn Page</a></span>
                     </div>
                     <div style="align-items: flex-start">
-                        <span><img width="32px" src="img/discord.png" alt="discord icon"><a href="https://discord.com/users/320904355089874944" target="_blank">My Discord Account (Steakmichel#0452)</a></span>
-                        <span><img width="32px" src="img/google.png" alt="google icon"><a href="mailto:louirlesbiron6@gmail.com" target="_blank">My email</a></span>
-                        <span><img width="32px" src="img/GeometryDash.svg" alt="gd icon"><a href="https://gdbrowser.com/u/lcb79" target="_blank">My Geometry Dash Account (LCB79)</a></span>  
+                        <span class=""><img width="32px" src="img/discord.png" alt="discord icon"><a href="https://discord.com/users/320904355089874944" target="_blank">My Discord Account (Steakmichel#0452)</a></span>
+                        <span class=""><img width="32px" src="img/google.png" alt="google icon"><a href="mailto:louirlesbiron6@gmail.com" target="_blank">My email</a></span>
+                        <span class=""><img width="32px" src="img/GeometryDash.svg" alt="gd icon"><a href="https://gdbrowser.com/u/lcb79" target="_blank">My Geometry Dash Account (LCB79)</a></span>  
                     </div>
                 </div>
             </div>
 
-            <div class="miniwall section anchored" id="projects">
+            <div class="miniwall section anchored highlightable" id="projects">
                 ↓ Biggest Projects ↓
             </div>
 
             <div class="coolInfo section">
-                <div class="ci_small">
+                <div class="ci_small highlightable">
                     <h2 class="ci_header">- PROGRAMMING -</h2>
                     <div class="ci_details">
                         <h3 class="ci_d_title">Infos:</h3>
@@ -85,7 +85,7 @@
                     </div>
 
                 </div>
-                <div class="ci_large" style="user-select: none;" id="angelToAdd3">
+                <div class="ci_large highlightable" style="user-select: none;" id="angelToAdd3">
                     <h2 id="angelToAdd1" class="ci_header verySmooth">
                         CanvasDotEffect (cdejs)
                         <img id="toggleCDEPreviewAudio" src="img/volume_off.svg" class="verySmooth ci_header_left" style="opacity: 0;cursor: default;" disabled></img>
@@ -102,16 +102,16 @@
 
 
             <div class="coolInfo section">
-                <div class="ci_large">
+                <div class="ci_large highlightable">
                     <h2 class="ci_header">ImgToText</h2>
                     <div class="ci_textContent">
                         ImgToText is a concise library that converts any image/video into custom text:
-                        <div id="textImg" contentEditable="true" title="Press 'CTRL + CLICK' to see the original!">
+                        <div id="textImg" contentEditable="true" spellcheck="false" title="Press 'CTRL + CLICK' to see the original!">
                            <c>I think this is a pretty cool example :D                       <br>                     </c><c style="color:rgb(223,176,39)">++o</c><c style="color:rgb(255,254,218)"> </c><c>   </c><c style="color:rgb(226,190,58)">oooo</c><c>                      <br>                </c><c style="color:rgb(217,175,28)">++++</c><c> </c><c style="color:rgb(223,176,39)">++oo</c><c style="color:rgb(247,231,102)">Xo</c><c style="color:rgb(223,177,28)">+oooo+</c><c style="color:rgb(223,192,89)">o</c><c>  </c><c style="color:rgb(235,182,23)">+++</c><c>               <br>             </c><c style="color:rgb(225,189,60)">o+</c><c> </c><c style="color:rgb(220,174,25)">++++o++ooo++o</c><c style="color:rgb(254,234,33)">OOo+</c><c style="color:rgb(219,173,25)">+oo</c><c style="color:rgb(247,224,34)">ooo</c><c>               <br>             </c><c style="color:rgb(223,184,54)">oo</c><c style="color:rgb(252,238,78)">Oo</c><c style="color:rgb(227,180,9)">++++oooOoooo</c><c style="color:rgb(253,234,32)">OOo+</c><c style="color:rgb(224,176,6)">+</c><c style="color:rgb(246,227,43)">OOOoo</c><c> </c><c style="color:rgb(219,184,58)">o+++</c><c>          <br>         </c><c style="color:rgb(241,182,58)">oo</c><c style="color:rgb(245,223,128)">XX</c><c style="color:rgb(225,186,60)">o+oOOO+</c><c style="color:rgb(219,169,3)">+o</c><c style="color:rgb(253,229,47)">OooOo</c><c style="color:rgb(246,165,13)">+o</c><c style="color:rgb(254,233,32)">OOo</c><c style="color:rgb(231,185,10)">+o</c><c style="color:rgb(253,236,39)">OOOo</c><c style="color:rgb(221,170,9)">++++++</c><c>          <br>       </c><c style="color:rgb(221,189,77)">o</c><c style="color:rgb(221,174,27)">+oo</c><c style="color:rgb(250,226,29)">o++ooooOO</c><c style="color:rgb(254,245,79)">Xo</c><c style="color:rgb(243,167,11)">+o</c><c style="color:rgb(253,221,27)">oOo</c><c style="color:rgb(246,165,13)">+o</c><c style="color:rgb(253,229,25)">oo+oOOO+</c><c style="color:rgb(234,177,2)">+++++o+oo+</c><c style="color:rgb(230,208,128)">O</c><c>      <br>         </c><c style="color:rgb(243,174,44)">o++</c><c style="color:rgb(252,226,26)">oOO</c><c style="color:rgb(254,244,78)">XO</c><c style="color:rgb(246,182,25)">oooOo+o++ooo++++o</c><c style="color:rgb(253,241,62)">OO</c><c style="color:rgb(218,168,1)">++o</c><c style="color:rgb(248,225,32)">ooOOOo+o</c><c style="color:rgb(226,200,131)">O</c><c>      <br>       </c><c style="color:rgb(240,189,84)">O</c><c style="color:rgb(246,173,34)">ooo+ooo</c><c style="color:rgb(254,223,13)">ooO</c><c style="color:rgb(252,239,75)">Oo</c><c style="color:rgb(247,179,9)">+oo</c><c style="color:rgb(193,141,24)">=</c><c style="color:rgb(150,74,10)">---~~~~</c><c style="color:rgb(206,134,12)">=+</c><c style="color:rgb(241,186,10)">+++oO</c><c style="color:rgb(254,241,65)">OO</c><c style="color:rgb(235,199,17)">o+++++ooooo</c><c>   <br>    </c><c style="color:rgb(221,187,57)">o+OOoOOOOOo</c><c style="color:rgb(252,213,5)">ooooo+</c><c style="color:rgb(183,119,16)">=~---~~~~~=++=</c><c style="color:rgb(245,193,7)">oooo++ooooO</c><c style="color:rgb(249,232,58)">O</c><c style="color:rgb(228,179,16)">+o</c><c style="color:rgb(246,206,78)">OO</c><c>   <br>     </c><c style="color:rgb(255,237,177)">H</c><c style="color:rgb(242,173,39)">oooo</c><c style="color:rgb(252,221,26)">ooOOOOOo</c><c style="color:rgb(175,119,10)">~~-------~-~~===+=</c><c style="color:rgb(247,183,4)">++oO</c><c style="color:rgb(253,238,51)">OOO+</c><c style="color:rgb(232,180,2)">+++</c><c style="color:rgb(229,208,132)">O</c><c>      <br>    </c><c style="color:rgb(211,179,56)">o++o</c><c style="color:rgb(221,166,1)">+++oooo</c><c style="color:rgb(251,220,32)">oo</c><c style="color:rgb(169,105,18)">~---~~--</c><c style="color:rgb(120,58,13)">---~</c><c style="color:rgb(196,118,17)">=====++=+</c><c style="color:rgb(252,205,8)">ooooo+++++o</c><c style="color:rgb(244,215,56)">OO</c><c>   <br>    </c><c style="color:rgb(218,182,47)">o+++oo</c><c style="color:rgb(249,231,43)">OOooooo</c><c style="color:rgb(157,85,11)">---~==------=</c><c style="color:rgb(205,127,17)">=++=++=+</c><c style="color:rgb(251,209,28)">ooooo</c><c style="color:rgb(253,244,79)">XO</c><c style="color:rgb(249,203,13)">ooooO</c><c style="color:rgb(244,228,74)">O</c><c>   <br>     </c><c style="color:rgb(242,224,155)">X</c><c style="color:rgb(224,200,94)">Oo</c><c style="color:rgb(225,178,7)">+++o+++++</c><c style="color:rgb(162,93,15)">~--~~~------=====</c><c style="color:rgb(223,141,47)">+=~=</c><c style="color:rgb(246,192,11)">ooooo++++</c><c style="color:rgb(231,196,94)">Oo</c><c>     <br>    </c><c style="color:rgb(217,179,39)">+++++++ooooooo</c><c style="color:rgb(166,103,17)">~--~~~-~=</c><c style="color:rgb(221,142,13)">========</c><c style="color:rgb(155,81,9)">-</c><c style="color:rgb(254,204,6)">ooooOO+++++++</c><c>     <br>    </c><c style="color:rgb(231,198,86)">OoooOO</c><c style="color:rgb(252,229,32)">OOooooooo</c><c style="color:rgb(210,165,24)">+</c><c style="color:rgb(151,82,13)">---~~~</c><c style="color:rgb(205,126,16)">=+=====~=</c><c style="color:rgb(237,204,44)">o++ooOOOO+++oo</c><c>     <br>     </c><c style="color:rgb(254,241,182)">H</c><c style="color:rgb(219,168,16)">++++++o+</c><c style="color:rgb(252,224,40)">OOOoooo+</c><c style="color:rgb(214,171,31)">++</c><c style="color:rgb(142,74,19)">-~~~~~~</c><c style="color:rgb(211,146,22)">=++</c><c style="color:rgb(243,213,43)">oOOo++ooooo++++</c><c>     <br>     </c><c style="color:rgb(254,229,162)">H</c><c style="color:rgb(225,184,55)">ooooo+oooooooooo+o</c><c style="color:rgb(211,155,3)">==+++=+</c><c style="color:rgb(250,213,25)">oo++oOOOO+++++ooo</c><c style="color:rgb(227,190,76)">o</c><c>     <br>         </c><c style="color:rgb(222,182,48)">o++++++o</c><c style="color:rgb(253,230,34)">OOo</c><c style="color:rgb(221,168,1)">+o</c><c style="color:rgb(252,221,28)">oO</c><c style="color:rgb(219,167,0)">++ooo++</c><c style="color:rgb(254,224,27)">oOOo</c><c style="color:rgb(221,172,5)">+</c><c style="color:rgb(253,220,30)">ooOO+</c><c style="color:rgb(216,167,0)">++++++</c><c style="color:rgb(230,209,143)">X</c><c>      <br>         </c><c style="color:rgb(232,204,112)">OOOO</c><c style="color:rgb(224,185,59)">o+oOOo</c><c style="color:rgb(230,183,8)">+ooO</c><c style="color:rgb(253,240,66)">O</c><c style="color:rgb(219,167,0)">++o</c><c style="color:rgb(253,220,27)">oO++ooO</c><c style="color:rgb(254,245,78)">XO</c><c style="color:rgb(221,172,4)">++o</c><c style="color:rgb(254,228,30)">O+</c><c style="color:rgb(213,170,11)">+</c><c style="color:rgb(237,209,123)">OOOX</c><c>        <br>            </c><c style="color:rgb(224,200,108)">O</c><c style="color:rgb(221,177,34)">++++oo++oo+++oo</c><c style="color:rgb(252,232,33)">O</c><c style="color:rgb(221,175,6)">+++oo</c><c style="color:rgb(253,241,69)">OX</c><c style="color:rgb(219,167,1)">++oo++</c><c style="color:rgb(254,238,190)">H</c><c>           <br> </c><c style="color:rgb(89,168,78)">=~~~~~~~==</c><c style="color:rgb(192,216,163)">O</c><c style="color:rgb(222,180,45)">o+ooO</c><c style="color:rgb(231,217,146)">X</c><c style="color:rgb(224,195,84)">o</c><c style="color:rgb(228,172,2)">++o</c><c style="color:rgb(253,221,28)">o+</c><c style="color:rgb(220,166,1)">++o</c><c style="color:rgb(253,221,27)">oOo</c><c style="color:rgb(217,171,13)">++++o</c><c style="color:rgb(252,224,37)">O</c><c style="color:rgb(217,168,0)">++</c><c> </c><c style="color:rgb(238,209,103)">O</c><c style="color:rgb(222,181,39)">++</c><c>     </c><c style="color:rgb(95,180,76)">====~~</c><c style="color:rgb(152,212,142)">o<br></c><c> </c><c style="color:rgb(97,168,87)">=~-</c><c style="color:rgb(56,147,37)">----~~==</c><c style="color:rgb(93,195,57)">=====</c><c style="color:rgb(198,208,132)">O</c><c style="color:rgb(215,167,9)">++ooo++=</c><c style="color:rgb(136,153,17)">~=</c><c style="color:rgb(230,190,15)">+++</c><c style="color:rgb(213,189,73)">o</c><c style="color:rgb(216,169,17)">++++++</c><c>  </c><c style="color:rgb(82,174,64)">=~~~~~~~~=~~=</c><c style="color:rgb(166,217,159)">O<br></c><c>  </c><c style="color:rgb(87,142,73)">~~--------~=</c><c style="color:rgb(92,195,57)">====</c><c style="color:rgb(155,218,139)">O</c><c>   </c><c style="color:rgb(227,208,122)">O</c><c style="color:rgb(220,186,57)">o</c><c> </c><c style="color:rgb(78,141,64)">~</c><c style="color:rgb(28,111,20)">::</c><c style="color:rgb(190,165,7)">=++</c><c>  </c><c style="color:rgb(221,195,96)">OO</c><c> </c><c style="color:rgb(142,193,123)">o+</c><c style="color:rgb(86,181,63)">=~~~~~~~~~=+==</c><c style="color:rgb(138,209,99)">o</c><c> <br>   </c><c style="color:rgb(72,141,51)">~----------~~</c><c style="color:rgb(88,190,53)">====~=</c><c>   </c><c style="color:rgb(78,141,63)">~::=</c><c style="color:rgb(195,175,40)">+</c><c>     </c><c style="color:rgb(107,192,87)">+==~~</c><c style="color:rgb(55,155,37)">--~~~=</c><c style="color:rgb(119,218,55)">+++=++</c><c>  <br>    </c><c style="color:rgb(75,132,59)">~~-----------~~</c><c style="color:rgb(77,182,54)">~==</c><c>   </c><c style="color:rgb(76,140,63)">~--</c><c style="color:rgb(100,196,48)">=</c><c style="color:rgb(156,215,116)">o</c><c>   </c><c style="color:rgb(125,198,113)">+=</c><c style="color:rgb(84,186,61)">=~~~~~~=+++++</c><c style="color:rgb(135,222,75)">+=o</c><c>   <br>     </c><c style="color:rgb(204,231,194)">X</c><c style="color:rgb(87,153,72)">~</c><c style="color:rgb(38,124,23)">::----------~~</c><c style="color:rgb(93,181,72)">=+</c><c style="color:rgb(173,212,160)">O</c><c> </c><c style="color:rgb(76,140,62)">~--</c><c style="color:rgb(108,201,52)">=</c><c style="color:rgb(163,219,117)">o</c><c> </c><c style="color:rgb(117,199,102)">+==</c><c style="color:rgb(69,172,47)">~~--====</c><c style="color:rgb(118,218,54)">++++++</c><c>      <br>      </c><c style="color:rgb(122,164,108)">+</c><c style="color:rgb(63,122,53)">--------------~</c><c style="color:rgb(83,184,59)">==</c><c> </c><c style="color:rgb(76,140,62)">~--</c><c style="color:rgb(108,202,50)">=</c><c style="color:rgb(162,219,117)">o</c><c style="color:rgb(93,165,82)">=~~~-~===========</c><c style="color:rgb(179,223,152)">O</c><c>      <br>          </c><c style="color:rgb(69,151,55)">~~::--------~~</c><c> </c><c style="color:rgb(76,140,63)">~--</c><c style="color:rgb(108,202,50)">=</c><c style="color:rgb(165,220,120)">o</c><c style="color:rgb(109,181,99)">+</c><c style="color:rgb(54,154,46)">~-~~=======~==</c><c style="color:rgb(104,191,84)">=+</c><c>       <br>           </c><c style="color:rgb(158,181,155)">o</c><c style="color:rgb(78,132,67)">~-</c><c style="color:rgb(33,121,18)">:-::::::-~</c><c style="color:rgb(77,176,57)">~~</c><c style="color:rgb(46,128,27)">--</c><c style="color:rgb(108,202,51)">=~</c><c style="color:rgb(60,154,51)">~~=~~~~~~=~=</c><c style="color:rgb(111,175,104)">+</c><c>           <br>                      </c><c style="color:rgb(102,176,95)">==~~</c><c style="color:rgb(46,128,26)">--</c><c style="color:rgb(109,202,53)">=+~</c><c>                       <br>                         </c><c style="color:rgb(76,142,61)">~--</c><c style="color:rgb(108,201,53)">=</c><c style="color:rgb(177,232,144)">O</c><c>                        </c>
                         </div>
                     </div>
                 </div>
-                <div class="ci_small">
+                <div class="ci_small highlightable">
                     <h2 class="ci_header">- PROGRAMMING -</h2>
                     <div class="ci_details">
                         <h3 class="ci_d_title">Infos:</h3>
@@ -134,7 +134,7 @@
 
 
             <div class="coolInfo section">
-                <div class="ci_small">
+                <div class="ci_small highlightable">
                     <h2 class="ci_header">- DIGITAL ARTS -</h2>
                     <div class="ci_details">
                         <h3 class="ci_d_title">Infos:</h3>
@@ -152,9 +152,9 @@
                         <span><a href="https://www.youtube.com/playlist?list=PL1DWr2_ZHnzXCgYUwYllJmVcqrx8C5nyF" target="_blank">Previews</a></span>
                     </div>
                 </div>
-                <div class="ci_large">
-                    <div id="inStasisImages" class="cover verySmooth" style="background-image: url(img/cool.png);" title="Toggle cool background animation..."></div>
-                    <h2 class="ci_header">
+                <div class="ci_large highlightable">
+                    <div id="inStasisImages" class="cover verySmooth" style="background-image: url(img/cool14.png);" title="Toggle cool background animation..."></div>
+                    <h2 class="ci_header" style="border-bottom: 5px solid rgb(var(--c2), .5);">
                         <img id="toggleInStasisImages" src="img/X.svg" class="ci_header_left verySmooth"></img>
                         <i id="textUnderlayToggle1" class="textUnderlay verySmooth" style="font-size: 1.4em;">In Stasis</i>
                         <div class="ci_header_right verySmooth" id="inStasisImagesGoSomewhere">
@@ -178,71 +178,71 @@
             </div>
 
 
-            <div class="header section">
+            <div class="header section highlightable">
                 Some other stuff!
                 <span class="smallText">Welcome to my other stuff!</span>
             </div>
 
-            <div class="miniwall section">
+            <div class="miniwall section highlightable">
                 ↓ My Youtube channel ↓
             </div>
 
             <div class="aloneText">
-                <span>I mainly have this channel for myself, I post pretty much only my Geometry Dash stuff and bouldering videos.</span>
+                <span class="highlightable">I mainly have this channel for myself, I post pretty much only my Geometry Dash stuff and bouldering videos.</span>
                 <div class="space"></div>
-                <span>You're still welcome to subscribe if you enjoy or want to support :D</span>
+                <span class="highlightable">You're still welcome to subscribe if you enjoy or want to support :D</span>
             </div>
 
             <div class="coolInfo section" style="justify-content: space-around;">
-                <div class="ci_medium">
+                <div class="ci_medium highlightable">
                     <iframe src="https://www.youtube.com/embed/qHX6_jSrnrU" loading="lazy" frameborder="0" title="Cool Video of Sonic Wave" allow="autoplay; picture-in-picture;"></iframe>
                 </div>
-                <div class="ci_medium">
+                <div class="ci_medium highlightable">
                     <iframe src="https://www.youtube.com/embed/HhgFm9qM7kM?si=ZZjBuERQqUae7N4K" title="Cool Preview Of In Stasis" allow="autoplay; clipboard-write; picture-in-picture; web-share"></iframe>
                 </div>
             </div>
 
             <div class="coolInfo section" style="justify-content: space-around;">
-                <div class="ci_medium">
+                <div class="ci_medium highlightable">
                     <iframe src="https://www.youtube.com/embed/EeVw_EElkII?si=B1QjlEZjJhE4pInX" loading="lazy" frameborder="0" title="Cool video of a v6 I did :)" allow="autoplay; picture-in-picture;"></iframe>
                 </div>
-                <div class="ci_medium">
+                <div class="ci_medium highlightable">
                     <iframe src="https://www.youtube.com/embed/w8tYnRjkfOg" loading="lazy" frameborder="0" title="Cool Video of Sink" class="ld_img" allow="autoplay; picture-in-picture;"></iframe>
                 </div>
             </div>
 
             
-            <div class="miniwall section">
+            <div class="miniwall section highlightable">
                 < I LIKE TO CREATE STUFF ! >
             </div>
 
-            <div class="aloneText">
+            <div class="aloneText highlightable">
                 <span>A couple images from some of my best works :)</span>
             </div>
 
             <div class="coolInfo section">
-                <div class="ci_medium cover" style="background-image: url(img/cool.png);" title='The part "The Apogee" of "In Stasis"'></div>
-                <i class="imageDescription verySmooth">The part "The Apogee" of "In Stasis"</i>
+                <div class="ci_medium cover highlightable" style="background-image: url(img/cool.png);" title='The part "The Apogee" of "In Stasis"'></div>
+                <i class="imageDescription verySmooth highlightable">The part "The Apogee" of "In Stasis"</i>
 
-                <div class="ci_medium cover" style="background-image: url(img/cool2.png);" title='Later in the part "The Apogee" of "In Stasis"'></div>
-                <i class="imageDescription verySmooth">Later in the part "The Apogee" of "In Stasis"</i>
+                <div class="ci_medium cover highlightable" style="background-image: url(img/cool2.png);" title='Later in the part "The Apogee" of "In Stasis"'></div>
+                <i class="imageDescription verySmooth highlightable">Later in the part "The Apogee" of "In Stasis"</i>
             </div>
 
             <div class="coolInfo section" style="justify-content: center;">
-                <div class="ci_large cover" style="background-image: url(img/surelythisisfine.png);" title='The drop part in "A Piece of Mine"'></div>
-                <i class="imageDescription verySmooth">The drop part in "A Piece of Mine"</i>
+                <div class="ci_large cover highlightable" style="background-image: url(img/surelythisisfine.png);" title='The drop part in "A Piece of Mine"'></div>
+                <i class="imageDescription verySmooth highlightable">The drop part in "A Piece of Mine"</i>
             </div>
             
             <div class="coolInfo section">
-                <div class="ci_medium cover" style="background-image: url(img/cool3.png);" title='The part "The Sky Is The Limit" of "In Stasis"'></div>
-                <i class="imageDescription verySmooth">The part "The Sky Is The Limit" of "In Stasis"</i>
-                <div class="ci_medium cover" style="background-image: url(img/cool5.png);" title='The part "The Journey" of "In Stasis"'></div>
-                <i class="imageDescription verySmooth">The part "The Journey" of "In Stasis"</i>
+                <div class="ci_medium cover highlightable" style="background-image: url(img/cool3.png);" title='The part "The Sky Is The Limit" of "In Stasis"'></div>
+                <i class="imageDescription verySmooth highlightable">The part "The Sky Is The Limit" of "In Stasis"</i>
+                <div class="ci_medium cover highlightable" style="background-image: url(img/cool5.png);" title='The part "The Journey" of "In Stasis"'></div>
+                <i class="imageDescription verySmooth highlightable">The part "The Journey" of "In Stasis"</i>
             </div>
 
             <div class="coolInfo section" style="justify-content: center;">
-                <div class="ci_large cover" style="background-image: url(img/cool4.png);" title='Later in the part "The Journey" of "In Stasis"'></div>
-                <i class="imageDescription verySmooth">Later in the part "The Journey" of "In Stasis"</i>
+                <div class="ci_large cover highlightable" style="background-image: url(img/cool4.png);" title='Later in the part "The Journey" of "In Stasis"'></div>
+                <i class="imageDescription verySmooth highlightable">Later in the part "The Journey" of "In Stasis"</i>
             </div>
 
             <footer>

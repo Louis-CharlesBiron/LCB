@@ -225,7 +225,7 @@ function createFancyLetter(text, pos, color=[225, 225, 255, 0]) {
 
         obj.playAnim(new Anim((prog)=>{
             obj.opacity = 1-prog
-        }, 14500, Anim.easeInSine, ()=>obj.remove()))
+        }, 18500, Anim.easeInSine, ()=>obj.remove()))
 
     }, (obj)=>{
         // Opacity effect
@@ -235,9 +235,7 @@ function createFancyLetter(text, pos, color=[225, 225, 255, 0]) {
 
 function generateText() {
     const text = "You can drag the stars!", letterWidth = createFancyLetter("O").getSize()[0], textWidth = 775, textStartPos = [(CVS_cdePreview.width-textWidth)/2, 200]
-    for (let i=0;i<text.length;i++) {
-        CVS_cdePreview.add(createFancyLetter(text[i], CDEUtils.addPos(textStartPos, [letterWidth*i, 0])))
-    }
+    for (let i=0;i<text.length;i++) CVS_cdePreview.add(createFancyLetter(text[i], CDEUtils.addPos(textStartPos, [letterWidth*i, 0])))
 }
 
 

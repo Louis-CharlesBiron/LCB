@@ -23,6 +23,7 @@ button {cursor: pointer}
 
 * {
     font-family: inherit;
+    transition: 0.4s all;
     outline: none;
 }
 
@@ -44,8 +45,6 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type=
     align-items: center;
     justify-content: flex-start;
 }
-
-
 
 .navbar {
     width: 100%;
@@ -71,12 +70,10 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type=
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+    background: linear-gradient(90deg, rgb(var(--c1)), rgb(var(--c2), 0.8), rgb(var(--c1)));
 }
 
-
-
 .section {
-    /* height: 72vh; */
     height: 500px;
     margin-top: 100px;
     padding: 16px;
@@ -128,6 +125,7 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type=
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+    user-select: text;
 }
 
 .miniwall {
@@ -404,7 +402,7 @@ p {
 .ci_header_right {
     position: absolute;
     right: 1%;
-    top: 13%;
+    top: 20%;
     display: flex;
     align-items: center;
     flex-direction: row;
@@ -533,4 +531,8 @@ p {
 
 .aloneText::selection {
     background-color: rgb(var(--c5), 0.65);
+}
+
+.highlightable:hover {
+    filter: brightness(1.13);
 }

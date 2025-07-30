@@ -96,17 +96,26 @@ CDEPreviewSpeed.oninput=()=>{
 }
 
 // In Stasis img carrousel
-let ISImgCarrousel_i = 0, ISImgCarrousel_images = ["img/cool.png", "img/cool10.png", "img/cool7.png", "img/cool9.png", "img/cool2.png", "img/cool8.png", "img/cool3.png", "img/cool11.png", "img/cool18.png", "img/cool17.png", "img/cool4.png", "img/cool12.png", "img/cool16.png", "img/cool13.png", "img/cool5.png", "img/cool15.png", "img/cool14.png"],
-    ISImgCarrousel_images_ll = ISImgCarrousel_images.length
+let ISImgCarrousel_i = 0, ISImgCarrousel_images = ["img/cool10.png", "img/cool7.png", "img/cool9.png", "img/cool8.png", "img/cool11.png", "img/cool18.png", "img/cool17.png", "img/cool12.png", "img/cool16.png", "img/cool13.png", "img/cool15.png", "img/cool14.png"],
+    ISImgCarrousel_images_ll = ISImgCarrousel_images.length, carrouselLock = true, autoUpdateCarrouselRegulatedCB = getInputRegulationCB(()=>carrouselLock=true, 2250)
 
 function updateCarrousel(indexIncrement) {
+    autoUpdateCarrouselRegulatedCB()
     inStasisImages.style.backgroundImage = `url(${ISImgCarrousel_images[ISImgCarrousel_i=(ISImgCarrousel_i+indexIncrement<0?ISImgCarrousel_images_ll-1:ISImgCarrousel_i+indexIncrement)%ISImgCarrousel_images_ll]})`
 }
 
-inStasisImagesGoLeft.onclick=()=>updateCarrousel(-1)
-inStasisImagesGoRight.onclick=()=>updateCarrousel(1)
+inStasisImagesGoLeft.onclick=()=>{
+    carrouselLock = false
+    updateCarrousel(-1)
+}
+inStasisImagesGoRight.onclick=()=>{
+    carrouselLock = false
+    updateCarrousel(1)
+}
 
-setInterval(()=>updateCarrousel(1), 8000)
+setInterval(()=>{
+    if (carrouselLock) updateCarrousel(1)
+}, 7000)
 
 // Toggle In Stasis images
 let ISImg_shown = true
