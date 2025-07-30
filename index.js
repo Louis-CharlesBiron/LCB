@@ -96,7 +96,8 @@ CDEPreviewSpeed.oninput=()=>{
 }
 
 // In Stasis img carrousel
-let ISImgCarrousel_i = 0, ISImgCarrousel_images = ["img/cool.png", "img/cool2.png", "img/cool3.png", "img/cool4.png", "img/cool5.png"], ISImgCarrousel_images_ll = ISImgCarrousel_images.length
+let ISImgCarrousel_i = 0, ISImgCarrousel_images = ["img/cool.png", "img/cool10.png", "img/cool7.png", "img/cool9.png", "img/cool2.png", "img/cool8.png", "img/cool3.png", "img/cool11.png", "img/cool18.png", "img/cool17.png", "img/cool4.png", "img/cool12.png", "img/cool16.png", "img/cool13.png", "img/cool5.png", "img/cool15.png", "img/cool14.png"],
+    ISImgCarrousel_images_ll = ISImgCarrousel_images.length
 
 function updateCarrousel(indexIncrement) {
     inStasisImages.style.backgroundImage = `url(${ISImgCarrousel_images[ISImgCarrousel_i=(ISImgCarrousel_i+indexIncrement<0?ISImgCarrousel_images_ll-1:ISImgCarrousel_i+indexIncrement)%ISImgCarrousel_images_ll]})`

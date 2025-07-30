@@ -530,3 +530,7 @@ p {
 .imageDescription:hover {
     opacity: 1;
 }
+
+.aloneText::selection {
+    background-color: rgb(var(--c5), 0.65);
+}
