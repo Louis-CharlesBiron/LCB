@@ -686,7 +686,16 @@ p {
 
 #dvdTextInput {
     cursor: default;
+    background-color: rgb(var(--c1));
+    outline: none;
+    border: 3px solid rgb(var(--c2));
+    resize: horizontal;
+    max-width: 300px;
+    height: 90%;
+    width: 20%;
+    color: rgb(var(--c5));
+    min-width: 150px;
 }
 #dvdTextInput:not([disabled]) {
-    
+    cursor: text;
 }

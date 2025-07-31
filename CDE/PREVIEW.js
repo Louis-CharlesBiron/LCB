@@ -4,32 +4,6 @@ const CVS_cdePreview_fpsCounter = new FPSCounter(), title = document.querySelect
 
 Color.OPACITY_VISIBILITY_THRESHOLD = 0.001
 
-// TODO, put in Utils
-function fade(prog, i, minValue=0, maxValue=5) {
-    maxValue -= minValue
-    return i%2?minValue+maxValue*(1-prog):minValue+maxValue*prog
-}
-function getNearestDots(dot, shape) {
-    let dots = shape.dots, d_ll = dots.length, dotX = dot.x, dotY = dot.y, res = []
-    for (let i=0;i<d_ll;i++) {
-        const atDot = dots[i]
-        if (atDot.id != dot.id) res.push([atDot, CDEUtils.getDist(dotX, dotY, atDot.pos[0], atDot.pos[1])])
-    }
-    return res.toSorted((d1, d2)=>d1[1]-d2[1])
-}
-function getInputRegulationCB(callback, msDelay) {
-    let timeout
-    return (...params)=>{
-        clearTimeout(timeout)
-        timeout = setTimeout(()=>callback(...params), msDelay)
-    }
-}
-function noTimeoutInterval(callback, delay) {
-    callback()
-    return setInterval(callback, delay)
-}
-
-
 // GRADIENT
 function createBgGradient(colorStops, type, height=CVS_cdePreview.height) {
     type ??= Gradient.TYPES.LINEAR
@@ -80,8 +54,8 @@ function createStars(gapX=30, maxAlphaInit=1.15, maxRadiusInit=10, rotationTime=
                     ay += dy
         
                     const maxAlpha = maxAlphaInit*modifier, maxRadius = maxRadiusInit-((maxRadiusInit/2)*modifier)
-                    dot.a = fade(prog, i, 0.15, maxAlpha)
-                    dot.radius = fade(prog, i, 2, maxRadius)
+                    dot.a = CDEUtils.fade(prog, i, 0.15, maxAlpha)
+                    dot.radius = CDEUtils.fade(prog, i, 2, maxRadius)
                 
                     if (prog == 1) {
                         iy = dot.y
@@ -93,7 +67,7 @@ function createStars(gapX=30, maxAlphaInit=1.15, maxRadiusInit=10, rotationTime=
     
         }), 0, [225, 225, 255, 0], limit, (render, dot, ratio, setupRes, mouse, dist, shape)=>{
     
-            const nearestDots = getNearestDots(dot, shape), nd_ll = nearestDots.length, threshold = 100
+            const nearestDots = CDEUtils.getNearestDots(dot, shape), nd_ll = nearestDots.length, threshold = 100
             for (let i=0;i<nd_ll;i++) {
                 const dotInfo = nearestDots[i]
                 if (dotInfo[1] > threshold) break
@@ -115,7 +89,7 @@ function createStars(gapX=30, maxAlphaInit=1.15, maxRadiusInit=10, rotationTime=
         const effectCenterPos = CVS_cdePreview.getResponsivePos([0.5, 1.2])
         obj.playAnim(new Anim((prog, i)=>{
             obj.rotateAt(prog*360*rotationDir, effectCenterPos)
-            obj.scaleAt([fade(prog, i, 1, 2), fade(prog, i, 1, 2)], effectCenterPos)
+            obj.scaleAt([CDEUtils.fade(prog, i, 1, 2), CDEUtils.fade(prog, i, 1, 2)], effectCenterPos)
         }, -rotationTime))
     
     })
@@ -168,7 +142,7 @@ function generateTrees() {
                     obj.scaleAt([0.8, 1.01])
                     setTimeout(()=>{
                         obj.playAnim(new Anim((prog, i)=>{
-                            obj.scaleAt([fade(prog, i, 0.8, 1.1), fade(prog, i, 1, 1.25)])
+                            obj.scaleAt([CDEUtils.fade(prog, i, 0.8, 1.1), CDEUtils.fade(prog, i, 1, 1.25)])
                         }, -10000))
                     }, CDEUtils.random(0, 5000))
 
@@ -186,9 +160,9 @@ function generateMoon() {
         obj.pos = CDEUtils.addPos(CVS_cdePreview.getCenter(), [-obj.size[0]/2, -CVS_cdePreview.height/2])
         
         obj.playAnim(new Anim((prog, i)=>{
-            obj.scaleAt([fade(prog, i, 0.86, 1.3), fade(prog, i, 0.86, 1.3)])
+            obj.scaleAt([CDEUtils.fade(prog, i, 0.86, 1.3), CDEUtils.fade(prog, i, 0.86, 1.3)])
             obj.rotateAt(-90+prog*360)
-            obj.opacity = fade(prog, i, 0.0325, 0.05)
+            obj.opacity = CDEUtils.fade(prog, i, 0.0325, 0.05)
         }, -75000))
     }, null, null, true)
 
@@ -196,9 +170,9 @@ function generateMoon() {
         obj.pos = CDEUtils.addPos(CVS_cdePreview.getCenter(), [-obj.size[0]/2, -CVS_cdePreview.height/2])
         
         obj.playAnim(new Anim((prog, i)=>{
-            obj.scaleAt([fade(prog, i, 1.2, 1.8), fade(prog, i, 1.2, 1.8)])
+            obj.scaleAt([CDEUtils.fade(prog, i, 1.2, 1.8), CDEUtils.fade(prog, i, 1.2, 1.8)])
             obj.rotateAt(prog*360)
-            obj.opacity = fade(prog, i, 0.015, 0.0365)
+            obj.opacity = CDEUtils.fade(prog, i, 0.015, 0.0365)
         }, -75000))
     }, null, null, true)
     

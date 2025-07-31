@@ -34,7 +34,7 @@ startCDEPreview.onpointerup=()=>{
 
         setTimeout(()=>startCDEPreview.remove(),1000)
 
-        noTimeoutInterval(()=>{
+        CDEUtils.noTimeoutInterval(()=>{
             CVS_cdePreview.fpsLimit = null
             CVS_cdePreview_fpsCounter.runRecommendedFPSEvaluation((results)=>{
                 CVS_cdePreview.fpsLimit = Math.max(60, results.recommendedValue)
@@ -97,7 +97,7 @@ CDEPreviewSpeed.oninput=()=>{
 
 // In Stasis img carrousel
 let ISImgCarrousel_i = 0, ISImgCarrousel_images = ["img/cool10.png", "img/cool7.png", "img/cool9.png", "img/cool8.png", "img/cool11.png", "img/cool18.png", "img/cool17.png", "img/cool12.png", "img/cool16.png", "img/cool13.png", "img/cool15.png", "img/cool14.png"],
-    ISImgCarrousel_images_ll = ISImgCarrousel_images.length, carrouselLock = true, autoUpdateCarrouselRegulatedCB = getInputRegulationCB(()=>carrouselLock=true, 2250)
+    ISImgCarrousel_images_ll = ISImgCarrousel_images.length, carrouselLock = true, autoUpdateCarrouselRegulatedCB = CDEUtils.getRegulationCB(()=>carrouselLock=true, 2250)
 
 function updateCarrousel(indexIncrement) {
     autoUpdateCarrouselRegulatedCB()
@@ -147,5 +147,5 @@ function positionImageDescriptions(preventRecall) {
     })
 }positionImageDescriptions()
 
-const imageDescPositionDelay = getInputRegulationCB(()=>positionImageDescriptions(), 250)
+const imageDescPositionDelay = CDEUtils.getRegulationCB(()=>positionImageDescriptions(), 250)
 window.addEventListener("resize",imageDescPositionDelay)

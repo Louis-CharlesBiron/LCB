@@ -1,4 +1,4 @@
-// CanvasDotEffect UMD - v1.2.1
+// CanvasDotEffect UMD - v1.3.0
 'use strict';
 // JS
 // Canvas Dot Effect by Louis-Charles Biron
@@ -18,17 +18,6 @@ class CDEUtils {
      */
     static getLast(arr, index=0) {
         return arr[arr.length-1-index]
-    }
-    
-    /**
-     * Returns the average of an array of numbers
-     * @param {Number[]} arr: an array of numbers
-     * @returns the average
-     */
-    static avg(arr) {
-        let a_ll = arr.length, total=0
-        for (let i=0;i<a_ll;i++) total+=arr[i]
-        return total/a_ll
     }
 
     /**
@@ -69,6 +58,17 @@ class CDEUtils {
     }
 
     /**
+     * Returns the average of an array of numbers
+     * @param {Number[]} arr: an array of numbers
+     * @returns the average
+     */
+    static avg(arr) {
+        let a_ll = arr.length, total=0
+        for (let i=0;i<a_ll;i++) total+=arr[i]
+        return total/a_ll
+    }
+
+    /**
      * Returns whether a value is defined
      * @param {*} value: the value to check
      * @returns whether the value is defined
@@ -95,6 +95,73 @@ class CDEUtils {
     static round(num, decimals=0) {
         const precision = 10**decimals
         return Math.round(num*precision)/precision
+    }
+
+    /**
+     * Fades a numeric value according to Anim progress and playCount
+     * @param {Number} prog: an Anim instance's progress
+     * @param {Number?} i: an Anin instance's play count. (Controls the direction of the fading animation)
+     * @param {Number?} minValue: the minimal value to reach
+     * @param {Number?} maxValue: the maximal value to reach
+     * @returns the calculated number
+     */
+    static fade(prog, i=0, minValue=0, maxValue=5) {
+        maxValue -= minValue
+        return i%2?minValue+maxValue*(1-prog):minValue+maxValue*prog
+    }
+
+    /**
+     * Calculates a 0..1 ratio based on the distance between two object and a limit/threshold
+     * @param {[x,y] | _BaseObj} pos1: a pos or _BaseObj inheritor instance
+     * @param {[x,y] | _BaseObj} pos2: another pos or _BaseObj inheritor instance
+     * @param {Number?} limit: the distance threshold use to calculate the ratio
+     * @returns a number between 0 and 1
+     */
+    static getRatio(pos1, pos2, limit=100) {
+        let p1 = pos1.pos||pos1, p2 = pos2.pos||pos2
+        return Math.min(1, CDEUtils.getDist(p1[0], p1[1], p2[0], p2[1])/limit)
+    }
+
+    /**
+     * Returns an array of a shape's dots ordered by the distance between them and the specified dot
+     * @param {Dot} dot: a Dot instance
+     * @param {Shape?} shape: a Shape instance. (Defaults to the shape containing "dot")
+     * @returns an ordered list of all dots [[dot, distance], ...]
+     */
+    static getNearestDots(dot, shape=dot.parent) {
+        let dots = shape.dots, d_ll = dots.length, dotX = dot.x, dotY = dot.y, res = []
+        for (let i=0;i<d_ll;i++) {
+            const atDot = dots[i]
+            if (atDot.id != dot.id) res.push([atDot, CDEUtils.getDist(dotX, dotY, atDot.pos[0], atDot.pos[1])])
+        }
+        return res.toSorted((d1, d2)=>d1[1]-d2[1])
+    }
+
+    /**
+     * Makes a callback only called after a certain amount of time without 'interaction'.
+     * This function returns a 'regulation callback' that will call the provided "callback" only after the provided amount of time has passed without it getting called.
+     * For example, calling the 'regulation callback', with a timeout of 1000ms, everytime a key is pressed will make it so the provided "callback" will be called only after no keys were pressed for 1 seconds.
+     * @param {Function} callback: a function to be called after "timeout" amount of time has passed with no 'interaction'
+     * @param {Number?} timeout: the minimal time window, in miliseconds, before calling callback after an 'interaction'
+     * @returns the 'regulation callback'
+     */
+    static getRegulationCB(callback, timeout=1000) {
+        let timeoutId
+        return (...params)=>{
+            clearTimeout(timeoutId)
+            timeoutId = setTimeout(()=>callback(...params), timeout)
+        }
+    }
+
+    /**
+     * Basically regular setInterval, but without the initial timeout on the first call
+     * @param {Function} callback: a function to be called
+     * @param {Number?} timeout: the timeout value in miliseconds
+     * @returns the setInteraval id
+     */
+    static noTimeoutInterval(callback, timeout=1000) {
+        callback()
+        return setInterval(callback, timeout)
     }
 
     /**
@@ -208,19 +275,6 @@ class CDEUtils {
         if (arr1.length !== arr2.length) return false
         return arr1.every((v, i)=>v==arr2[i])
     }
-
-        /**
-     * Fades a numeric value according to Anim progress and playCount
-     * @param {Number} prog: an Anim instance's progress
-     * @param {Number?} i: an Anin instance's play count. (Controls the direction of the fading animation)
-     * @param {Number?} minValue: the minimal value to reach
-     * @param {Number?} maxValue: the maximal value to reach
-     * @returns the calculated number
-     */
-        static fade(prog, i=0, minValue=0, maxValue=5) {
-            maxValue -= minValue
-            return i%2?minValue+maxValue*(1-prog):minValue+maxValue*prog
-        }
     
     /**
      * Adds a pos to another
@@ -386,7 +440,7 @@ class FPSCounter {
         if (this._maxFps < fps) this._maxFps = fps
         return fps
     }
-    
+
     /**
      * Run in a loop to get how many times per seconds it runs
      * @returns the current averaged amount of times ran in a second
@@ -398,14 +452,14 @@ class FPSCounter {
         return Math.min(CDEUtils.avg(avgSample), this._maxFps)|0
     }
 
-    /**
+        /**
      * Compares the max acheive fps and a chart of common refresh rates. (This function only works while either 'getFpsRaw()' or 'getFps' is running in a loop)
      * @param {Number?} forceFPS: if defined, returns the probable refresh rate for this fps value. Defaults to the user's max fps.
      * @returns the probable refresh rate of the user or null if not enough time has passed
      */
-    getApproximatedUserRefreshRate(forceFPS=this.maxFps) {
-        return performance.now() > 1000 ? FPSCounter.COMMON_REFRESH_RATES.reduce((a,b)=>a<(forceFPS-1)?b:a,null) : null
-    }
+        getApproximatedUserRefreshRate(forceFPS=this.maxFps) {
+            return performance.now() > 1000 ? FPSCounter.COMMON_REFRESH_RATES.reduce((a,b)=>a<(forceFPS-1)?b:a,null) : null
+        }
 
     /**
      * Tries to calculate the most stable fps based on the current amount of lag, device performance / capabilities. Results will fluctuate over time. (This function only works while 'getFps()' is running in a loop)
@@ -3263,6 +3317,7 @@ class Canvas {
     static #ON_FIRST_INTERACT_CALLBACKS = []
     static DEFAULT_MOUSE_MOVE_THROTTLE_DELAY = 10
     static ACTIVATION_MARGIN_DISABLED = 0
+    static MOBILE_SCROLLING_STATES = {DISABLED:0, IF_CANVAS_STOPPED:1, ALWAYS:2}
 
     #lastFrame = 0           // default last frame time
     #lastLimitedFrame = 0    // last frame time for limited fps
@@ -3275,6 +3330,7 @@ class Canvas {
     #lastScrollValues = [window.scrollX, window.screenY] // last window scroll x/y values
     #mouseMoveCB = null      // the custom mouseMoveCB. Used for mobile adjustments
     #visibilityChangeLastState = null // stores the cvs state before document visibility change
+    #mobileScrollingState = Canvas.MOBILE_SCROLLING_STATES.IF_CANVAS_STOPPED // Whether to prevent the default action taken by ontouchstart
 
     /**
      * Represents a html canvas element
@@ -3859,7 +3915,7 @@ class Canvas {
         this._mouse.checkValid()
         if (CDEUtils.isFunction(callback)) callback(this._mouse, e)
     }
-
+    
 
     /**
      * Defines the onmousemove listener
@@ -3922,13 +3978,6 @@ class Canvas {
         if (CDEUtils.isFunction(callback)) callback(this._mouse, e)
         if (!preventOnFirstInteractionTrigger && Canvas.#ON_FIRST_INTERACT_CALLBACKS) Canvas.#onFirstInteraction(e)
     }
-
-    static MOBILE_SCROLLING_STATES = {DISABLED:0, IF_CANVAS_STOPPED:1, ALWAYS:2}
-    #mobileScrollingState = Canvas.MOBILE_SCROLLING_STATES.IF_CANVAS_STOPPED
-    
-    get mobileScrollingState() {return this.#mobileScrollingState}
-    
-    set mobileScrollingState(state) {this.#mobileScrollingState = state}
 
     /**
      * Defines the onmousedown listener
@@ -4133,6 +4182,7 @@ class Canvas {
     get mouseMoveThrottlingDelay() {return this._mouseMoveThrottlingDelay}
     get dimensions() {return [[0,0],this.size]}
     get hasBeenStarted() {return Boolean(this.timeStamp)}
+    get mobileScrollingState() {return this.#mobileScrollingState}
 
 	set id(id) {this._id = id}
 	set loopingCB(loopingCB) {this._loopingCB = loopingCB}
@@ -4161,6 +4211,7 @@ class Canvas {
     set speedModifier(speedModifier) {this._speedModifier = speedModifier}
     set mouseMoveListenersOptimizationEnabled(enabled) {this._mouse._moveListenersOptimizationEnabled = enabled}
     set mouseMoveThrottlingDelay(mouseMoveThrottlingDelay) {this._mouseMoveThrottlingDelay = mouseMoveThrottlingDelay}
+    set mobileScrollingState(state) {this.#mobileScrollingState = state}
 }
 // JS
 // Canvas Dot Effect by Louis-Charles Biron
