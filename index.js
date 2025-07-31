@@ -135,7 +135,6 @@ toggleInStasisImages.onclick=()=>{
     }
 }
 
-
 // Position image descriptions
 function positionImageDescriptions(preventRecall) {
     document.querySelectorAll(".imageDescription").forEach(el=>{

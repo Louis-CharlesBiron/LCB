@@ -551,6 +551,40 @@ p {
 }
 
 
+#dvdEditor {
+    width: 90%;
+    background: rgb(var(--c3), 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    border: 5px solid rgb(var(--c2));
+    height: 0px;
+    opacity: 0;
+}
+
+#closeDvdEditor:not([disabled]) {
+    cursor: pointer;
+}
+
+#dvdTextInput {
+    cursor: default;
+    background-color: rgb(var(--c1));
+    outline: none;
+    border: 3px solid rgb(var(--c2));
+    resize: horizontal;
+    max-width: 300px;
+    height: 90%;
+    width: 20%;
+    color: rgb(var(--c5));
+    min-width: 150px;
+}
+#dvdTextInput:not([disabled]) {
+    cursor: text;
+}
+
+
+
+
 
 /* SMALLER DEVICES */
 @media (max-width: 702px) {
@@ -574,7 +608,7 @@ p {
     }
 
     .linksContent > div {
-        width: 45%;
+        width: 42%;
         font-size: 0.85em;
     }
 
@@ -666,36 +700,6 @@ p {
         width: 100%;
         margin-bottom: 50px;
         justify-content: center;
+        height: 120%;
     }
-}
-
-#dvdEditor {
-    width: 90%;
-    background: rgb(var(--c3), 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: space-evenly;
-    border: 5px solid rgb(var(--c2));
-    height: 0px;
-    opacity: 0;
-}
-
-#closeDvdEditor:not([disabled]) {
-    cursor: pointer;
-}
-
-#dvdTextInput {
-    cursor: default;
-    background-color: rgb(var(--c1));
-    outline: none;
-    border: 3px solid rgb(var(--c2));
-    resize: horizontal;
-    max-width: 300px;
-    height: 90%;
-    width: 20%;
-    color: rgb(var(--c5));
-    min-width: 150px;
-}
-#dvdTextInput:not([disabled]) {
-    cursor: text;
 }

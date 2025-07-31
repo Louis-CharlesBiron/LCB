@@ -1,5 +1,6 @@
+let CDEPREVIEWFPS = 0
 const CVS_cdePreview_fpsCounter = new FPSCounter(), title = document.querySelector("title"), 
-      CVS_cdePreview = new Canvas(document.getElementById("cdePreview"), ()=>title.textContent = CVS_cdePreview_fpsCounter.getFps()+" fps"), // TODO REMOVE FPS
+      CVS_cdePreview = new Canvas(document.getElementById("cdePreview"), ()=>CDEPREVIEWFPS=CVS_cdePreview_fpsCounter.getFps()),
       CVS_cdePreview_l2 = new Canvas(document.getElementById("cdePreview_l2"), null, 30)
 
 Color.OPACITY_VISIBILITY_THRESHOLD = 0.001
@@ -290,10 +291,10 @@ function CDEPreviewStop() {
 
 
 
+
 /**
  * UTILS 
 */
-
 function createButton(CVS, text="Button", pos=CVS.getCenter(), onClickCB, fillColor="aliceblue", textColor="red", padding=[20, 30]) {
     // Creating the button's text
     const textDisplay = new TextDisplay(text, [0,0], textColor, _, _, _, (self)=>{// setupCB

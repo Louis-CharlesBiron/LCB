@@ -3318,6 +3318,14 @@ class Canvas {
     static DEFAULT_MOUSE_MOVE_THROTTLE_DELAY = 10
     static ACTIVATION_MARGIN_DISABLED = 0
     static MOBILE_SCROLLING_STATES = {DISABLED:0, IF_CANVAS_STOPPED:1, ALWAYS:2}
+    static #DOM_CANVAS_LINKS = new Map()
+    static #DOM_CANVAS_INTERSECTION_OBSERVER = new IntersectionObserver((entries)=>{
+        const e_ll = entries.length
+        for (let i=0;i<e_ll;i++) {
+            const entry = entries[i], CVS = Canvas.getFromHTMLCanvas(entry.target)
+            if (CDEUtils.isFunction(CVS._onIntersectionChangeCB)) CVS._onIntersectionChangeCB(entry.intersectionRatio > 0, CVS, entry)
+        }
+    })
 
     #lastFrame = 0           // default last frame time
     #lastLimitedFrame = 0    // last frame time for limited fps
@@ -3329,7 +3337,7 @@ class Canvas {
     #cachedSize = null       // cached canvas size
     #lastScrollValues = [window.scrollX, window.screenY] // last window scroll x/y values
     #mouseMoveCB = null      // the custom mouseMoveCB. Used for mobile adjustments
-    #visibilityChangeLastState = null // stores the cvs state before document visibility change
+    #visibilityChangeLastState = [] // stores the cvs state before document visibility change and canvas viewport visibility change
     #mobileScrollingState = Canvas.MOBILE_SCROLLING_STATES.IF_CANVAS_STOPPED // Whether to prevent the default action taken by ontouchstart
 
     /**
@@ -3352,6 +3360,9 @@ class Canvas {
             this.onVisibilityChangeCB = null                              // callback with the actions to be taken on document visibility change (isVisible, CVS, e)=>
             this._onResizeCB = null                                       // callback with the actions to be taken on document resize (newCanvasSize, CVS, e)=>
             this._onScrollCB = null                                       // callback with the actions to be taken on document scroll ([pageScrollX, pageScrollY], CVS, e)=>
+            this.onIntersectionChangeCB = null                            // callback with the actions to be taken on intersection change / canvas visibility change. (isVisible, CVS, e)=>
+            Canvas.#DOM_CANVAS_INTERSECTION_OBSERVER.observe(this._cvs)
+            Canvas.#DOM_CANVAS_LINKS.set(this._cvs, this)
         }
         this._ctx = this._cvs.getContext("2d", {willReadFrequently})  // canvas context
         this._settings = this.updateSettings(settings||Canvas.DEFAULT_CTX_SETTINGS)// set context settings
@@ -3405,10 +3416,12 @@ class Canvas {
         },
         onvisibilitychange=e=>this._onVisibilityChangeCB(!document.hidden, this, e),
         onscroll=e=>{
-          const scrollX = window.scrollX, scrollY = window.scrollY
+          const scrollX = window.scrollX, scrollY = window.scrollY, mouseX =  this._mouse.x, mouseY = this._mouse.y
           this.updateOffset()
-          this._mouse.updatePos(this._mouse.x+(scrollX-this.#lastScrollValues[0]), this._mouse.y+(scrollY-this.#lastScrollValues[1]), [0,0])
-          this.#mouseMovements()
+          if (mouseX != null && mouseY != null) {
+            this._mouse.updatePos(this._mouse.x+(scrollX-this.#lastScrollValues[0]), this._mouse.y+(scrollY-this.#lastScrollValues[1]), [0,0])
+            this.#mouseMovements()
+          }
           this.#lastScrollValues[0] = scrollX
           this.#lastScrollValues[1] = scrollY
           if (CDEUtils.isFunction(this._onScrollCB)) this._onScrollCB([scrollX, scrollY], this, e)
@@ -3431,6 +3444,15 @@ class Canvas {
             removeOnscrollListener:()=>window.removeEventListener("scroll", onscroll),
             removeOnloadListener:()=>window.removeEventListener("load", onLoad)
         }
+    }
+
+    /**
+     * Returns the Canvas instance linked to the provided HTML canvas element
+     * @param {HTMLCanvasElement} cvs: an HTML canvas element
+     * @returns the Canvas instance linked, if any
+     */
+    static getFromHTMLCanvas(cvs) {
+        return Canvas.#DOM_CANVAS_LINKS.get(cvs)
     }
 
     /**
@@ -3714,8 +3736,10 @@ class Canvas {
         this._viewPos[1] = y
         
         this.updateOffset()
-        this._mouse.updatePos(this._mouse.rawX, this._mouse.rawY, this._offset)
-        this.#mouseMovements()
+        if (this._mouse.x != null && this._mouse.y != null) {
+            this._mouse.updatePos(this._mouse.rawX, this._mouse.rawY, this._offset)
+            this.#mouseMovements()
+        }
     }
 
     /**
@@ -3729,8 +3753,10 @@ class Canvas {
         this._viewPos[1] += y
 
         this.updateOffset()
-        this._mouse.updatePos(this._mouse.rawX, this._mouse.rawY, this._offset)
-        this.#mouseMovements()
+        if (this._mouse.x != null && this._mouse.y != null) {
+            this._mouse.updatePos(this._mouse.rawX, this._mouse.rawY, this._offset)
+            this.#mouseMovements()
+        }
     }
 
     /**
@@ -3993,7 +4019,7 @@ class Canvas {
                 const touches = e.touches
                 if (touches.length==1) {
                     const scrollState = this.#mobileScrollingState
-                    if (e.cancelable && (!scrollState || (scrollState==1 && this._state == Canvas.STATES.LOOPING))) e.preventDefault()
+                    if (e.cancelable && (!scrollState || (scrollState==1 && this.looping))) e.preventDefault()
                     e.x = CDEUtils.round(touches[0].clientX, 1)
                     e.y = CDEUtils.round(touches[0].clientY, 1)
                     e.button = 0
@@ -4138,6 +4164,20 @@ class Canvas {
     disableMouseMoveThrottling() {
         this._mouseMoveThrottlingDelay = 0
     }
+
+    /**
+     * Disables all on intersection change actions
+     */
+    disableViewportIntersectionOptimizations() {
+        this.onIntersectionChangeCB = undefined
+    }
+
+    /**
+     * Sets the on interaction change actions to be the default optimizations
+     */
+    enableDefaultViewportIntersectionOptimizations() {
+        this.onIntersectionChangeCB = null
+    }
     
 	get id() {return this._id}
 	get cvs() {return this._cvs}
@@ -4148,8 +4188,8 @@ class Canvas {
 	get size() {return this.#cachedSize}
 	get settings() {return this._settings}
 	get loopingCB() {return this._loopingCB}
-	get looping() {return this._state==1}
-	get stopped() {return this._state==0}
+	get looping() {return this._state==Canvas.STATES.LOOPING}
+	get stopped() {return this._state==Canvas.STATES.STOPPED}
     get state() {return this._state}
 	get deltaTime() {return this._deltaTime}
 	get windowListeners() {return this._windowListeners}
@@ -4170,6 +4210,7 @@ class Canvas {
         return this._fpsLimit==null||isStatic ? isStatic ? "static" : null : 1/(this._fpsLimit/1000)
     }
     get onVisibilityChangeCB() {return this._onVisibilityChangeCB}
+    get onIntersectionChangeCB() {return this._onIntersectionChangeCB}
     get onResizeCB() {return this._onResizeCB}
     get onScrollCB() {return this._onScrollCB}
     get maxTime() {return this.#maxTime}
@@ -4194,16 +4235,32 @@ class Canvas {
         this.#maxTime = this.#getMaxTime(fpsLimit)
     }
     set onVisibilityChangeCB(onVisibilityChangeCB) {
-        this.#visibilityChangeLastState = this._state
+        this.#visibilityChangeLastState[0] = this._state
         this._onVisibilityChangeCB = (isVisible, CVS, e)=>{
-            if (!isVisible) this.#visibilityChangeLastState = this._state
-            if (this.#visibilityChangeLastState==1) {
+            if (!isVisible) this.#visibilityChangeLastState[0] = this._state
+            if (this.#visibilityChangeLastState[0]==1) {
                 if (isVisible) {
                     this.startLoop()
                     this.resetReferences()
                 } else this.stopLoop()
             }
             if (CDEUtils.isFunction(onVisibilityChangeCB)) onVisibilityChangeCB(isVisible, CVS, e)
+        }
+    }
+    set onIntersectionChangeCB(onIntersectionChangeCB) {
+        if (onIntersectionChangeCB===undefined) this._onIntersectionChangeCB = null
+        else {
+            this.#visibilityChangeLastState[1] = this._state
+            this._onIntersectionChangeCB = (isVisible, CVS, e)=>{
+                if (!isVisible) this.#visibilityChangeLastState[1] = this._state
+                if (this.#visibilityChangeLastState[1]==Canvas.STATES.LOOPING) {
+                    if (isVisible) {
+                        this.startLoop()
+                        this.resetReferences()
+                    } else this.stopLoop()
+                }
+                if (CDEUtils.isFunction(onIntersectionChangeCB)) onIntersectionChangeCB(isVisible, CVS, e)
+            }
         }
     }
     set onResizeCB(onResize) {this._onResizeCB = onResize}
