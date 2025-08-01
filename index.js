@@ -148,3 +148,55 @@ function positionImageDescriptions(preventRecall) {
 
 const imageDescPositionDelay = CDEUtils.getRegulationCB(()=>positionImageDescriptions(), 250)
 window.addEventListener("resize",imageDescPositionDelay)
+
+
+// images borders
+const borderCVS = [], imgBordersParentMapping = new Map()
+
+function positionFloatingBorder(borderEl, img, offset=7, padding=30) {
+    const imgBCR = img.getBoundingClientRect()
+    borderEl.style.left = (imgBCR.x-offset-padding-3)+"px"
+    borderEl.style.top =  (12-padding)+"px"
+    borderEl.style.width =  (imgBCR.width+padding*2)+"px"
+    borderEl.style.height = (imgBCR.height+offset+padding*2)+"px"
+}
+
+function drawBorders(reposition) {
+    const b_ll = borderCVS.length
+    for (let i=0;i<b_ll;i++) {
+        const CVS = borderCVS[i], profile = CVS.render.profile1.update(Color.rgba(...Color.random(null, false, [180, 230], [180, 230], [180, 230]).slice(0,3), .75), null, null, null, 2), lineType = Render.LINE_TYPES.CUBIC_BEZIER
+              minX = 10, minY=14, padding = 23, maxX = CVS.width-minX, maxY = CVS.height-minY, getVar=(variation=5)=>CDEUtils.random(-variation, variation)
+    
+        CVS.clear()
+        CVS.render.stroke(lineType([minX+getVar()-padding,minY+getVar()], [maxX+getVar()+padding, minY+getVar()]), profile) // top
+        CVS.render.stroke(lineType([minX+getVar(),minY+getVar()-padding], [minX+getVar(), maxY+getVar()+padding]), profile) // left
+        CVS.render.stroke(lineType([maxX+getVar()+padding, maxY+getVar()], [minX+getVar()-padding, maxY+getVar()]), profile) // bottom
+        CVS.render.stroke(lineType([maxX+getVar(), maxY+getVar()+padding], [maxX+getVar(), minY+getVar()-padding]), profile) // right
+
+
+
+        if (reposition) positionFloatingBorder(CVS.cvs.parentElement, imgBordersParentMapping.get(CVS.cvs.parentElement))
+    }
+}
+
+;[...document.querySelectorAll(".ci_medium.highlightable, .cover.highlightable")].forEach(el=>{
+    const borderEl = document.createElement("div"), innerCvs = document.createElement("canvas")
+    borderEl.className = "floatingBorder"
+
+    el.parentElement.appendChild(borderEl)
+    imgBordersParentMapping.set(borderEl, el)
+    positionFloatingBorder(borderEl, el)
+    borderEl.appendChild(innerCvs)
+
+    const innerCVS = new Canvas(innerCvs, null, null, el)
+    innerCVS.initializeStatic()
+    borderCVS.push(innerCVS)
+
+    el.onmouseenter=()=>borderEl.style.opacity = 1
+    el.onmouseleave=()=>borderEl.style.opacity = 0
+})
+
+CDEUtils.noTimeoutInterval(()=>drawBorders(true), 225)
+
+const imageBordersPositionDelay = CDEUtils.getRegulationCB(()=>drawBorders(true), 500)
+window.addEventListener("resize",imageBordersPositionDelay)

@@ -71,6 +71,7 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type=
     align-items: center;
     justify-content: flex-start;
     background: linear-gradient(90deg, rgb(var(--c1)), rgb(var(--c2), 0.8), rgb(var(--c1)));
+    position: relative;
 }
 
 .section {
@@ -167,6 +168,7 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type=
     justify-content: flex-start;
     overflow: hidden;
     position: relative;
+    z-index: 3;
 }
 
 .ci_small {
@@ -582,12 +584,27 @@ p {
     cursor: text;
 }
 
+.floatingBorder {
+    transition: 0.4s all;
+    position: absolute !important;
+    background-color: transparent !important;
+    border: none !important;
+    outline: none !important;
+    z-index: 1 !important;
+    opacity: 0;
+}
+
+
 
 
 
 
 /* SMALLER DEVICES */
 @media (max-width: 702px) {
+
+    .floatingBorder {
+        display: none !important;
+    }
 
     .navbar > a {
         padding: 3px 6px;
