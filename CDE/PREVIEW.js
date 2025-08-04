@@ -188,7 +188,7 @@ TextStyles.loadCustomFont("fonts/BitcountPropSingle/BitcountPropSingle.ttf", "bi
 
 function createFancyLetter(text, pos, color, isMobileVersion) {
     color??=[225, 225, 255, 0]
-    return new TextDisplay(text, pos, color, CVS_cdePreview.render.textProfile1.update(TextStyles.getFontStyleDeclaration("bitcountPropSingle", isMobileVersion ? "22px" : "46px")), null, null, (obj)=>{
+    return new TextDisplay(text, pos, color, CVS_cdePreview.render.textProfile1.update(TextStyles.getFontStyleDeclaration("bitcountPropSingle", isMobileVersion ? "18px" : "46px")), null, null, (obj)=>{
 
         // Slow wobble effect
         let distance = CDEUtils.random(-12, 14), duration = -CDEUtils.random(2000, 7000), iy = obj.y, ay = 0
@@ -216,7 +216,7 @@ function createFancyLetter(text, pos, color, isMobileVersion) {
 }
 
 function generateText() {
-    const isMobileVersion = CVS_cdePreview.width <= 430, text = "You can drag the stars!", letterWidth = createFancyLetter("O", null, null, isMobileVersion).getSize()[0], textWidth = isMobileVersion ? 375 : 775, textStartPos = [(CVS_cdePreview.width-textWidth)/2, 200]
+    const isMobileVersion = CVS_cdePreview.width <= 430, text = "You can drag the stars!", letterWidth = createFancyLetter("O", null, null, isMobileVersion).getSize()[0], textWidth = isMobileVersion ? 315 : 775, textStartPos = [(CVS_cdePreview.width-textWidth)/2, 200]
     for (let i=0;i<text.length;i++) CVS_cdePreview.add(createFancyLetter(text[i], CDEUtils.addPos(textStartPos, [letterWidth*i, 0]), null, isMobileVersion))
 }
 

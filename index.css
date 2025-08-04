@@ -720,3 +720,27 @@ p {
         height: 120%;
     }
 }
+
+@media (max-width: 345px) {
+    .navbar > a {
+        padding: 3px 5px;
+        font-size: 1.25em;
+    }
+
+    .miniwall {
+        font-size: 1.3em;
+    }
+
+    .header {
+        font-size: 7em;
+    }
+
+    .linksContent img {
+        width: 25px;
+    }
+
+    .linksContent > div {
+        width: 40%;
+        font-size: 0.75em;
+    }
+}
