@@ -39,9 +39,9 @@ class CDEUtils {
      * @returns the generated number
      */
     static random(min, max, decimals=0) {
-        max++
+        max+=(decimals?0:1)
         if (decimals) {
-            const precision = decimals**10
+            const precision = 10**decimals
             return Math.round((Math.random()*(max-min)+min)*precision)/precision
         } else return (Math.random()*(max-min)+min)>>0
     }
@@ -231,10 +231,24 @@ class CDEUtils {
      * @param {Number} y1: the y value of the first point
      * @param {Number} x2: the x value of the second point
      * @param {Number} y2: the y value of the second point
-     * @returns 
+     * @returns the distance
      */
     static getDist(x1, y1, x2, y2) {
-        return Math.sqrt((x1-x2)**2 + (y1-y2)**2)
+        const dx = x1-x2, dy = y1-y2
+        return Math.sqrt(dx*dx+dy*dy)
+    }
+
+    /**
+     * Returns the pythagorian distance between 2 points
+     * @param {Number} x1: the x value of the first point
+     * @param {Number} y1: the y value of the first point
+     * @param {Number} x2: the x value of the second point
+     * @param {Number} y2: the y value of the second point
+     * @returns the distance
+     */
+    static getDist_pos(pos1, pos2) {
+        const dx = pos1[0]-pos2[0], dy = pos1[1]-pos2[1]
+        return Math.sqrt(dx*dx+dy*dy)
     }
 
     /**
@@ -245,6 +259,18 @@ class CDEUtils {
     static getLinearFn(pos1, pos2) {
         const a = (pos2[1]-pos1[1])/(pos2[0]-pos1[0]), b = -a*pos1[0]+pos1[1]
         return [a, b, (x)=>a*x+b, pos1]
+    }
+
+    /**
+    * Returns the "a", "b" and "function" values formed by a line between 2 positions
+     * @param {Number} x1: the x value of a point
+     * @param {Number} y1: the y value of a point
+     * @param {Number} x2: the x value of another point
+     * @param {Number} y2: the y value of another point
+     */
+    static getLinearFn_coords(x1, y1, x2, y2) {
+        const a = (y2-y1)/(x2-x1), b = -a*x1+y1
+        return [a, b, (x)=>a*x+b, [x1, y1]]
     }
 
     /**
@@ -452,14 +478,14 @@ class FPSCounter {
         return Math.min(CDEUtils.avg(avgSample), this._maxFps)|0
     }
 
-        /**
+    /**
      * Compares the max acheive fps and a chart of common refresh rates. (This function only works while either 'getFpsRaw()' or 'getFps' is running in a loop)
      * @param {Number?} forceFPS: if defined, returns the probable refresh rate for this fps value. Defaults to the user's max fps.
      * @returns the probable refresh rate of the user or null if not enough time has passed
      */
-        getApproximatedUserRefreshRate(forceFPS=this.maxFps) {
-            return performance.now() > 1000 ? FPSCounter.COMMON_REFRESH_RATES.reduce((a,b)=>a<(forceFPS-1)?b:a,null) : null
-        }
+    getApproximatedUserRefreshRate(forceFPS=this.maxFps) {
+        return performance.now() > 1000 ? FPSCounter.COMMON_REFRESH_RATES.reduce((a,b)=>a<(forceFPS-1)?b:a,null) : null
+    }
 
     /**
      * Tries to calculate the most stable fps based on the current amount of lag, device performance / capabilities. Results will fluctuate over time. (This function only works while 'getFps()' is running in a loop)
@@ -3330,6 +3356,7 @@ class Canvas {
     #lastFrame = 0           // default last frame time
     #lastLimitedFrame = 0    // last frame time for limited fps
     #fixedTimeStampOffset = 0// fixed requestanimationframe timestamp in ms
+    #rawTimeStamp = null     // the raw requestanimationframe timestamp in ms
     #maxTime = null          // max time between frames
     #timeStamp = null        // requestanimationframe timestamp in ms
     #cachedEls = []          // cached canvas elements to draw
@@ -3530,6 +3557,7 @@ class Canvas {
 
     // main loop, runs every frame
     #loop(time, wasRestarted) {
+        this.#rawTimeStamp = time
         const frameTime = (time-this.#lastFrame)*this._speedModifier, fpsLimit = this._fpsLimit, state = this._state
 
         if (state != 2) {
@@ -3955,16 +3983,16 @@ class Canvas {
             let lastEventTime=0
             this.#mouseMoveCB = callback
             const onmousemove=e=>{
-                const time = this.timeStamp
-                if (time-lastEventTime > this._mouseMoveThrottlingDelay) {
+                const time = this.#rawTimeStamp
+                if (time-lastEventTime > Math.abs(this._mouseMoveThrottlingDelay*this._speedModifier)) {
                     lastEventTime = time
                     this._mouse.updatePos(e.x, e.y, this._offset)
                     this._mouse.calcAngle()         
                     this.#mouseMovements(callback, e)
                 }
             }, ontouchmove=e=>{
-                const touches = e.touches, time = this.timeStamp
-                if (time-lastEventTime > this._mouseMoveThrottlingDelay && touches.length==1) {
+                const touches = e.touches, time = Math.abs(this.#rawTimeStamp)
+                if (time-lastEventTime > Math.abs(this._mouseMoveThrottlingDelay*this._speedModifier) && touches.length==1) {
                     lastEventTime = time
                     e.x = CDEUtils.round(touches[0].clientX, 1)
                     e.y = CDEUtils.round(touches[0].clientY, 1)
@@ -4195,7 +4223,8 @@ class Canvas {
 	get deltaTime() {return this._deltaTime}
 	get windowListeners() {return this._windowListeners}
 	get timeStamp() {return this._fixedTimeStamp||this.#timeStamp}
-	get timeStampRaw() {return this.#timeStamp}
+	get timeStampNotFixed() {return this.#timeStamp}
+	get timeStampRaw() {return this.#rawTimeStamp}
 	get els() {return this._els}
 	get mouse() {return this._mouse}
 	get typingDevice() {return this._typingDevice}
@@ -4297,21 +4326,41 @@ class Anim {
         this._startTime = null // start time
         this._progress = 0     // animation progress
         this._playCount = 0    // how many time the animation has played
+        this._isReversed = false
     }
     
-    // progresses the animation 1 frame fowards (loops each frame) 
+    // progresses the animation 1 frame (loops each frame) 
     getFrame(time, deltaTime) {
-        const isInfinite = this._duration<0, duration = isInfinite?-this._duration:this._duration, startTime = this._startTime
+        const isInfinite = this._duration<0, duration = isInfinite?-this._duration:this._duration, startTime = this._startTime, reversed = this._isReversed
         if (!this._playCount || isInfinite) {
             // SET START TIME
             if (!startTime) this._startTime = time
             // PLAY ANIMATION
-            else if (time<startTime+duration) {
-                this._progress = this._easing((time-startTime)/duration)
+            else if (deltaTime >= 0 && time < startTime+duration) {
+                let elapsed = time-startTime, prog = this._easing((Math.abs(elapsed))/duration)
+                this._progress = reversed ? 1-prog : prog
                 this._animation(this._progress, this._playCount, deltaTime, this.progress)
+                if (reversed && elapsed > 0) {
+                    this._isReversed = false
+                    this._playCount++
+                }
+            } 
+            else if (deltaTime < 0 && time > startTime-duration) {
+                let reversedElapsed = startTime-time, prog = this._easing((Math.abs(reversedElapsed))/duration)
+                if (!reversed && reversedElapsed > 0) {
+                    this._isReversed = true
+                    this._playCount++
+                } 
+                if (this._easing((Math.abs(startTime-(time+deltaTime*1000)))/duration) > 1) {
+                    this._startTime=null
+                    this._animation(0, this._playCount++, deltaTime, 0)
+                } else {
+                    this._progress = this._isReversed ? 1-prog : prog
+                    this._animation(this._progress, this._playCount, deltaTime, this.progress)
+                }
             }
             // REPEAT IF NEGATIVE DURATION
-            else if (isInfinite) this.reset(true, deltaTime)
+            else if (isInfinite && !this._isReversed) this.reset(true, deltaTime)
             // END
             else this.end(deltaTime)
         }
@@ -4320,12 +4369,13 @@ class Anim {
     // ends the animation
     end(deltaTime) {
         this._animation(1, this._playCount++, deltaTime, 1)
-        if (CDEUtils.isFunction(this._endCB)) this._endCB()
+        if (CDEUtils.isFunction(this._endCB)) this._endCB(this)
     }
 
     // resets the animation
     reset(isInfiniteReset, deltaTime) {
-        if (isInfiniteReset) this._animation(1, this._playCount++, deltaTime, 1)
+        console.log("reset")
+        if (isInfiniteReset)this._animation(1, this._playCount++, deltaTime, 1)
         else this._playCount = 0
         this._progress = 0
         this._startTime = null
@@ -7861,8 +7911,8 @@ class Dot extends _Obj {
     * } The 2 intersection points for the target and for the source
     */
    getLinearIntersectPoints(target=this._connections[0], targetPadding=target.radius??5, source=this, sourcePadding=this.radius??5) {
-       const [tx, ty] = target.pos??target, [sx, sy] = source.pos??source,
-           [a, b, lfn] = CDEUtils.getLinearFn([sx,sy], [tx,ty]), t_r = targetPadding**2, s_r = sourcePadding**2,
+       const pos1 = target.pos??target, tx = pos1[0], ty = pos1[1], pos2 = source.pos??source, sx = pos2[0], sy = pos2[1],
+           res = CDEUtils.getLinearFn_coords(sx, sy, tx, ty), a = res[0], b = res[1], lfn = res[2], t_r = targetPadding**2, s_r = sourcePadding**2,
            qA = (1+a**2)*2,
            s_qB = -(2*a*(b-sy)-2*sx),
            s_qD = Math.sqrt(s_qB**2-(4*(qA/2)*((b-sy)**2+sx**2-s_r))),
