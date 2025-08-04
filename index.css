@@ -721,7 +721,7 @@ p {
     }
 }
 
-@media (max-width: 345px) {
+@media (max-width: 355px) {
     .navbar > a {
         padding: 3px 5px;
         font-size: 1.25em;
