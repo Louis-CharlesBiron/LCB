@@ -46,24 +46,18 @@ function generateGradients() {
 function createStars(gapX=30, maxAlphaInit=1.15, maxRadiusInit=10, rotationTime=120000, dotAnimDurationRange=[4000, 7000], enableGlow=true, limit=100, lineOpacitySubstractor=0.08, rotationDir=1) {
     return new Shape([0,CVS_cdePreview.height/2],
         Shape.generate(null, [0,0], CVS_cdePreview.width, gapX, [-CVS_cdePreview.height/2, CVS_cdePreview.height/2], (dot)=>{
-    
-            let distance = CDEUtils.random(-38, 38), modifier = CDEUtils.random(0.1, 1, 2), duration = -CDEUtils.random(...dotAnimDurationRange), iy = dot.y, ay = 0
+
+            let moveCB = CanvasUtils.getMovementOscillatorCB(dot, [CDEUtils.random(-15, 15), CDEUtils.random(-38, 38)], true), modifier = CDEUtils.random(0.1, 1, 2), duration = -CDEUtils.random(...dotAnimDurationRange)
             setTimeout(()=>{
                 dot.playAnim(new Anim((prog, i)=>{
-                    const dy = ((i%2)||-1)*distance*prog-ay
-                    dot.y += dy
-                    ay += dy
-        
+                    moveCB(prog, i)
+
                     const maxAlpha = maxAlphaInit*modifier, maxRadius = maxRadiusInit-((maxRadiusInit/2)*modifier)
                     dot.a = CDEUtils.fade(prog, i, 0.15, maxAlpha)
                     dot.radius = CDEUtils.fade(prog, i, 2, maxRadius)
                 
-                    if (prog == 1) {
-                        iy = dot.y
-                        ay = 0
-                    }
                 }, duration, Anim.easeInOutQuad))
-            }, CDEUtils.random(0, 2000))
+            }, CDEUtils.random(0, 4000))
             dot.setupResults = CanvasUtils.getDraggableDotCB(true)
     
         }), 0, [225, 225, 255, 0], limit, (render, dot, ratio, setupRes, mouse, dist, shape)=>{

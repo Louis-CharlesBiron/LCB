@@ -94,6 +94,13 @@ CDEPreviewSpeed.oninput=()=>{
         CDEPreviewSpeedValueDisplay.textContent = `(${CVS_cdePreview.speedModifier = +CDEPreviewSpeed.value}x)`
     }
 }
+CDEPreviewSpeed.parentElement.oncontextmenu=e=>{
+    if (CVS_cdePreview && CDEPreviewSpeed.value != "1") {
+        e.preventDefault()
+        CDEPreviewSpeed.value = 1
+        CDEPreviewSpeedValueDisplay.textContent = `(${CVS_cdePreview.speedModifier = 1}x)`
+    }
+}
 
 // In Stasis img carrousel
 let ISImgCarrousel_i = 0, ISImgCarrousel_images = ["img/cool10.png", "img/cool7.png", "img/cool9.png", "img/cool8.png", "img/cool11.png", "img/cool18.png", "img/cool17.png", "img/cool12.png", "img/cool16.png", "img/cool13.png", "img/cool15.png", "img/cool14.png"],
