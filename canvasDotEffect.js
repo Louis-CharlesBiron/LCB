@@ -4119,7 +4119,7 @@ class Canvas {
                     e.button = 0
                     this.#mouseClicks(callback, e)
                     this.#mouseMovements(callback, e)
-                    setTimeout(()=>this._mouse.invalidate())
+                    setTimeout(()=>this._mouse.invalidate(), 50)
                 }     
             }, onmouseup=e=>{
                 if (!isTouch) this.#mouseClicks(callback, e)
