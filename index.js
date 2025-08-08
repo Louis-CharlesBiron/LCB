@@ -207,3 +207,10 @@ CDEUtils.noTimeoutInterval(()=>drawBorders(true), 225)
 
 const imageBordersPositionDelay = CDEUtils.getRegulationCB(()=>drawBorders(true), 500)
 window.addEventListener("resize",imageBordersPositionDelay)
+
+
+// Update last edited text
+fetch("https://api.github.com/repos/Louis-CharlesBiron/LCB/commits/deploy").then(res=>res.json()).then(data=>{
+    const date = new Date(data.commit.author.date)
+    lastEditedDate.textContent = `Last edited: ${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`
+})

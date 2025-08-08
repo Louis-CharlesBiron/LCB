@@ -594,7 +594,13 @@ p {
     opacity: 0;
 }
 
-
+#lastEditedDate {
+    position: absolute;
+    left: 6px;
+    bottom: 2px;
+    font-size: 0.6925em;
+    opacity: 0.75;
+}
 
 
 
@@ -744,3 +750,4 @@ p {
         font-size: 0.75em;
     }
 }
+
