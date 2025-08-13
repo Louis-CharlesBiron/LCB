@@ -445,7 +445,7 @@ class FPSCounter {
 
     /**
      * Allows to get the current frames per second.
-     * To use: either getFpsRaw for raw fps, AND/OR getFps for averaged fps
+     * To use: either getFpsRaw for raw fps, AND/OR getFps for a smoother fps display
      * @param {Number?} averageSampleSize: the sample size used to calculate the current fps average
      */
     constructor(averageSampleSize) {
@@ -526,6 +526,17 @@ class FPSCounter {
         }
     }
 
+    [Symbol.toPrimitive]() {
+        return this.getFps()
+    }
+
+    *[Symbol.iterator]() {
+        const times = this._times, t_ll = times.length
+        for (let i=0;i<t_ll;i++) yield times[i]
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "FPSCounter"}
     get maxFps() {return this._maxFps-1}
     get averageSampleSize() {return this._averageSampleSize}
     get fpsRaw() {return this._times.length}
@@ -868,6 +879,49 @@ class CanvasUtils {
     }
 
     /**
+     * Creates a simple button
+     * @param {Canvas} CVS: the canvas instance to use
+     * @param {String?} text: the button's text
+     * @param {[x,y]?} pos: the center pos of the button
+     * @param {Function?} onClickCB: function called on button click
+     * @param {String | [r,g,b,a] | Color?} fillColor: the fill color of the button
+     * @param {String | [r,g,b,a] | Color?} textColor: the text color of the button
+     * @param {[paddingX, paddingY]?} padding: the vertical and horizontal padding of the button
+     * @param {Function?} onHoverCB: function called on button enter/leave
+     * @param {Boolean?} disableDefaultEffects: if true, disable all default visual effects
+     * @returns the button as a FilledShape and a TextDisplay: [FilledShape, TextDisplay]
+     */
+    static createButton(CVS, text="Button", pos=CVS.getCenter(), onClickCB=null, fillColor="aliceblue", textColor="black", padding=[20, 30], onHoverCB=null, disableDefaultEffects=false) {
+        const textDisplay = new TextDisplay(text, [0,0], textColor, null, null, null, self=>{
+            const [width, height] = self.trueSize, w = width/2+padding[1]/2, h = height/2+padding[0]/2,
+                button = CVS.add(new FilledShape(fillColor, true, pos, [new Dot([-w,-h]),new Dot([w,-h]),new Dot([w,h]),new Dot([-w,h])], 0, fillColor, null, null, null, null, null, null, true)),
+                brightnesses = {default:100, hover:85, click:70},
+                
+            hoverHandler=(isHover)=>{
+                if (!disableDefaultEffects) {
+                    button.fillColorObject.brightness = isHover ? brightnesses.hover : brightnesses.default
+                    CVS.setCursorStyle(isHover ? Canvas.CURSOR_STYLES.POINTER : Canvas.CURSOR_STYLES.DEFAULT)                
+                }
+                if (CDEUtils.isFunction(onHoverCB)) onHoverCB(isHover, button, self)
+            },
+            clickHandler=(isDown)=>{
+                if (!disableDefaultEffects) button.fillColorObject.brightness = isDown ? brightnesses.click : brightnesses.hover
+                if (isDown && CDEUtils.isFunction(onClickCB)) onClickCB(button, self)
+            }
+
+            CVS.mouse.addListener(button, Mouse.LISTENER_TYPES.DOWN, ()=>clickHandler(true))
+            CVS.mouse.addListener(button, Mouse.LISTENER_TYPES.UP, ()=>clickHandler(false))
+            CVS.mouse.addListener(button, Mouse.LISTENER_TYPES.ENTER, ()=>hoverHandler(true))
+            CVS.mouse.addListener(button, Mouse.LISTENER_TYPES.LEAVE, ()=>hoverHandler(false))
+
+            return button
+        }, null, self=>self.setupResults)
+        
+        CVS.add(textDisplay)
+        return [textDisplay.setupResults, textDisplay]
+    }
+
+    /**
      * Provides generic follow paths
      */
     static FOLLOW_PATHS = {
@@ -990,15 +1044,16 @@ class Color {
 
     // updates the cached rgba value
     #updateCache() {
-        if (this._format == Color.FORMATS.GRADIENT || this._format == Color.FORMATS.PATTERN) this.#rgba = this.#hsv = []
+        const formats = Color.FORMATS, format = this._format
+        if (format==formats.GRADIENT || format==formats.PATTERN) this.#rgba = this.#hsv = []
         else {
-            this.#rgba = this._format !== Color.FORMATS.RGBA ? this.convertTo() : Color.#unlinkRGBA(this._color)
-            const rgba = this.#rgba, DDRP = Color.DEFAULT_DECIMAL_ROUNDING_POINT, round = CDEUtils.round
+            this.#rgba = format != formats.RGBA ? this.convertTo() : Color.#unlinkRGBA(this._color)
+            const rgba = this.#rgba, DDRP = Color.DEFAULT_DECIMAL_ROUNDING_POINT, round = CDEUtils.round, a = rgba[3]
             rgba[0] = round(rgba[0], DDRP)
             rgba[1] = round(rgba[1], DDRP)
             rgba[2] = round(rgba[2], DDRP)
-            rgba[3] = round(rgba[3], DDRP)
-            this.#hsv = Color.convertTo(this.#rgba, Color.FORMATS.HSV)
+            rgba[3] = a!=null ? round(a, DDRP) : 1
+            this.#hsv = Color.convertTo(rgba, formats.HSV)
         }
     }
 
@@ -1055,7 +1110,12 @@ class Color {
         else if (outputFormat==formats.HSV) return Color.convertTo(randomRGBA, formats.HSV)
         else return randomRGBA
     }
-
+    
+    // create a separate copy of an RGBA array
+    static #unlinkRGBA(rgba) {
+        return rgba ? [rgba[0], rgba[1], rgba[2], rgba[3]] : null
+    }
+    
     // converts rbga to hsv (without alpha)
     static #rgbaToHsv(rgba) {
         let r = rgba[0]/255, g = rgba[1]/255, b = rgba[2]/255,
@@ -1073,16 +1133,9 @@ class Color {
         return [hue, max&&(diff/max)*100, max*100]
     }
 
-    // create a separate copy of an RGBA array
-    static #unlinkRGBA(rgba) {
-        return rgba ? [rgba[0], rgba[1], rgba[2], rgba[3]] : null
-    }
-
-    // converts hsv to rbga (without default alpha)
-    static #hsvToRgba(hsva) {
-        let hue = hsva[0], sat = hsva[1]/100, bright = hsva[2]/100,
-        chro = bright*sat, x = chro*(1-Math.abs(((hue/60)%2)-1)), dc = bright-chro,
-        r, g, b
+    // converts hsv to rbga (with default alpha)
+    static #hsvToRgba(hsv) {
+        let hue = hsv[0], sat = hsv[1]/100, bright = hsv[2]/100, chro = bright*sat, x = chro*(1-Math.abs(((hue/60)%2)-1)), dc = bright-chro, r, g, b
     
         if (0<=hue&&hue<60) {r=chro;g=x;b=0}
         else if (60<=hue&&hue<120) {r=x;g=chro;b=0}
@@ -1096,13 +1149,28 @@ class Color {
     
     // converts rbga to hex
     static #rgbaToHex(rgba) {
-        const hex = "#"+rgba.reduce((a,b,i)=>a+=(i&&!(i%3)?Math.round(b*255):b).toString(16).padStart(2,"0"),"")
-        return rgba[3]==1 ? hex.slice(0,7) : hex
+        let r = (rgba[0]|0).toString(16), g = (rgba[1]|0).toString(16), b = (rgba[2]|0).toString(16), a = rgba[3], hex = "#"+(r.length<2?"0"+r:r)+(g.length<2?"0"+g:g)+(b.length<2?"0"+b:b)
+        if (a!=1) {
+            const alpha = (Math.round(a*255)).toString(16)
+            hex += (alpha.length<2?"0"+alpha:alpha)
+        }
+        return hex
     }
 
     // converts hex to rgba
     static #hexToRgba(hex) {
-        return hex.padEnd(9, "F").match(/[a-z0-9]{2}/gi).reduce((a,b,i)=>a.concat(parseInt(b, 16)/(i&&!(i%3)?255:1)),[])
+        if (hex[0]!="#") hex = "#"+hex
+        const res = [], h_ll = hex.length-1, isShort = h_ll < 6, hasAlpha = h_ll==4||h_ll==8
+        if (isShort) for (let i=1;i<=h_ll;i++) {
+            let char1 = hex[i], v = parseInt(char1+char1, 16)
+            if (hasAlpha && i==h_ll) v = Math.round(v/255*100)/100
+            res.push(v)
+        } else for (let i=1;i<h_ll;i+=2) {
+            let v = parseInt(hex[i]+hex[i+1], 16)
+            if (hasAlpha && i+1==h_ll) v = Math.round(v/255*100)/100
+            res.push(v) 
+        }
+        return res
     }
 
     /**
@@ -1120,18 +1188,78 @@ class Color {
         Color.CSS_COLOR_TO_RGBA_CONVERTIONS[color] ? formats.TEXT: null
     }
 
-    // ajust color values to Color instances
-    static adjust(color) {
+    /**
+     * Uniquifies a color to a unique Color instance
+     * @param {String | [r,g,b,a] | Color} color: a color definition
+     * @returns a unique Color instance
+     */
+    static uniquify(color) {
         return color instanceof Color ? color.isChannel?color:color.duplicate() : new Color(color)
+    }
+
+    /**
+     * Adds specific values to a rgba array
+     * @param {[r,g,b,a]} rgba: the rgba array to modify
+     * @param {Number?} rValue: the red value to add
+     * @param {Number?} gValue: the green value to add
+     * @param {Number?} bValue: the blue value to add
+     * @param {Number?} aValue: the alpha value to add
+     * @returns an updated rgba array
+     */
+    static rgbaAdd(rgba, rValue=0, gValue=0, bValue=0, aValue=0) {
+        const c = (v, isAlpha)=>CDEUtils.clamp(v, 0, isAlpha?1:255)
+        return [c(rgba[0]+(rValue||0)), c(rgba[1]+(gValue||0)), c(rgba[2]+(bValue||0)), c(rgba[3]+(aValue||0), true)]
+    }
+
+    /**
+     * Adds a value to a each value of a rgba array (except alpha)
+     * @param {[r,g,b,a]} rgba: the rgba array to modify
+     * @param {Number?} value: the value to add
+     * @returns an updated rgba array
+     */
+    static rgbaAddAll(rgba, value=0) {
+        const c = (v, isAlpha)=>CDEUtils.clamp(v, 0, isAlpha?1:255)
+        return [c(rgba[0]+(value||0)), c(rgba[1]+(value||0)), c(rgba[2]+(value||0)), rgba[3]]
+    }
+
+    /**
+     * Sets specific values of a rgba array
+     * @param {[r,g,b,a]} rgba: the rgba array to modify
+     * @param {Number?} rValue: the new red value
+     * @param {Number?} gValue: the new green value
+     * @param {Number?} bValue: the new blue value
+     * @param {Number?} aValue: the new alpha value
+     * @returns an updated rgba array
+     */
+    static rgbaSet(rgba, rValue, gValue, bValue, aValue) {
+        const c = (v, isAlpha)=>CDEUtils.clamp(v, 0, isAlpha?1:255)
+        return [c(rValue??rgba[0]??0), c(gValue??rgba[1]??0), c(bValue??rgba[2]??0), c(aValue??rgba[3]??1, true)]
+    }
+
+    /**
+     * Updates a rgba array by hsv modifications
+     * @param {[r,g,b,a]} rgba: the rgba array to modify
+     * @param {Number?} hueValue: the hue value to add
+     * @param {Number?} saturationValue: the saturation value to add
+     * @param {Number?} brightnessValue: the brightness value to add
+     * @returns an updated rgba array
+     */
+    static rgbaHsvAdd(rgba, hueValue, saturationValue, brightnessValue) {
+        const hsv = Color.#rgbaToHsv(rgba)
+        hsv[0] = ((hsv[0]+(hueValue??0))%360)||0
+        hsv[1] = (CDEUtils.clamp((hsv[1]+(saturationValue??0)), 0, 100))||0
+        hsv[2] = (CDEUtils.clamp((hsv[2]+(brightnessValue??0)), 0, 100))||0
+
+        return Color.rgbaSet(Color.#hsvToRgba(hsv), null, null, null, rgba[3])
     }
     
     /**
      * Formats a rgba array to a usable rgba value
-     * @param {[r,g,b,a]} arrayRgba: the rgba array to format
+     * @param {[r,g,b,a]} rgba: the rgba array to format
      * @returns a string containing the color as rgba format
      */
-    static formatRgba(arrayRgba) {
-        return Array.isArray(arrayRgba) ? `rgba(${arrayRgba[0]}, ${arrayRgba[1]}, ${arrayRgba[2]}, ${arrayRgba[3]})` : null
+    static formatRgba(rgba) {
+        return Array.isArray(rgba) ? `rgba(${rgba[0]??255}, ${rgba[1]??255}, ${rgba[2]??255}, ${rgba[3]??1})` : null
     }
 
     /**
@@ -1212,8 +1340,18 @@ class Color {
         return colorValue
     }
 
-    // returns the usable value of the color
-    get color() {
+    [Symbol.toPrimitive]() {
+        return this.color
+    }
+
+    *[Symbol.iterator]() {
+        const rgba = this.#rgba
+        for (let i=0;i<4;i++) yield rgba[i]
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "Color"}
+    get color() {// returns the usable value of the color
         const formats = Color.FORMATS, format = this._format
         if (format == formats.GRADIENT || format == formats.PATTERN) return this._color.value
         else return Color.formatRgba(this.#rgba)
@@ -1297,6 +1435,8 @@ class _HasColor {
         return CDEUtils.isFunction(this._initColor) ? this._initColor(this) : this._initColor||null
     }
 
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "_HasColor"}
     get colorObject() {return this._color}
     get colorRaw() {return this._color.colorRaw}
     get color() {return this._color?.color}
@@ -1322,7 +1462,7 @@ class _HasColor {
             }
 
             if (c instanceof Color) c.color = color
-            else this._color = Color.adjust(color)
+            else this._color = Color.uniquify(color)
         }
     }
     set r(r) {this._color.r = r}
@@ -1928,6 +2068,13 @@ class TypingDevice {
         return Boolean(this._keysPressed.length)
     }
 
+    *[Symbol.iterator]() {
+        const keyPressed = this._keysPressed, k_ll = keyPressed.length
+        for (let i=0;i<k_ll;i++) yield keyPressed[i]
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "TypingDevice"}
     get keysPressedRaw() {return this._keysPressed}
     get keysPressed() {return this._keysPressed.map(v=>v.key)}
     get keyCodesPressed() {return this._keysPressed.map(v=>v.keyCode)}
@@ -2166,6 +2313,8 @@ class Mouse {
         else return x >= positions[0][0] && x <= positions[1][0] && y >= positions[0][1] && y <= positions[1][1]
     }
 
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "Mouse"}
     get ctx() {return this._ctx}
 	get valid() {return this._valid}
 	get x() {return this._x}
@@ -2422,6 +2571,15 @@ class Render {
     }
 
     /**
+     * Instanciates and returns a path containing svg data
+     * @param {String} data: SVG path data
+     * @returns a Path2D instance
+     */
+    static getFromSVGPath(data) {
+        return new Path2D(data)
+    }
+
+    /**
      * Creates and adds a new custom RenderStyles profile base on a given base profile
      * @param {RenderStyles} baseProfile: the RenderStyles instance to base the copy on
      * @returns a RenderStyles instance
@@ -2446,7 +2604,7 @@ class Render {
     /**
      * Queues a path to be stroked in batch at the end of the current frame
      * @param {Path2D} path: the path to batch
-     * @param {RenderStyles | [r,g,b,a]?} renderStyles: either be a rgba array or a RenderStyles instance
+     * @param {RenderStyles | [r,g,b,a]?} renderStyles: either a rgba array or a RenderStyles instance
      * @param {[filter, compositeOperation, opacity]?} forceVisualEffects: the filter, composite operation and opacity effects to apply
      */
     batchStroke(path, renderStyles=Color.DEFAULT_RGBA, forceVisualEffects=[]) {
@@ -2460,7 +2618,7 @@ class Render {
     /**
      * Queues a path to be filled in batch at the end of the current frame
      * @param {Path2D} path: the path to batch
-     * @param {RenderStyles | [r,g,b,a]?} renderStyles: either be a rgba array or a RenderStyles instance
+     * @param {RenderStyles | [r,g,b,a]?} renderStyles: either a rgba array or a RenderStyles instance
      * @param {[filter, compositeOperation, opacity]?} forceVisualEffects: the filter, composite operation and opacity effects to apply
      */
     batchFill(path, renderStyles=Color.DEFAULT_RGBA, forceVisualEffects=[]) {
@@ -2525,7 +2683,7 @@ class Render {
     /**
      * Directly strokes a path on the canvas
      * @param {Path2D} path: the path to batch
-     * @param {RenderStyles | [r,g,b,a]?} renderStyles: either be a rgba array or a RenderStyles instance
+     * @param {RenderStyles | [r,g,b,a]?} renderStyles: either a rgba array or a RenderStyles instance
      * @param {[filter, compositeOperation, opacity]?} forceVisualEffects: the filter, composite operation and opacity effects to apply
      */
     stroke(path, renderStyles=Color.DEFAULT_RGBA, forceVisualEffects=[]) {
@@ -2542,7 +2700,7 @@ class Render {
     /**
      * Directly fills a path on the canvas
      * @param {Path2D} path: the path to batch
-     * @param {RenderStyles | [r,g,b,a]?} renderStyles: either be a rgba array or a RenderStyles instance
+     * @param {RenderStyles | [r,g,b,a]?} renderStyles: either a rgba array or a RenderStyles instance
      * @param {[filter, compositeOperation, opacity]?} forceVisualEffects: the filter, composite operation and opacity effects to apply
      */
     fill(path, renderStyles=Color.DEFAULT_RGBA, forceVisualEffects=[]) {
@@ -2877,6 +3035,8 @@ class Render {
         }
     }
 
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "Render"}
 	get ctx() {return this._ctx}
 	get batchedStrokes() {return this._batchedStrokes}
 	get batchedFills() {return this._bactchedStandalones}
@@ -3126,6 +3286,17 @@ class TextStyles {
         return [style, variant, weight, size, family].filter(Boolean).join(" ")
     }
 
+    [Symbol.toPrimitive]() {
+        return this.toString()
+    }
+
+    *[Symbol.iterator]() {
+        const styles = this.getStyles(), s_ll = styles.length
+        for (let i=0;i<s_ll;i++) yield styles[i]
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "TextStyles"}
     get id() {return this.id}
     get render() {return this._render}
 	get font() {return this._font}
@@ -3323,7 +3494,18 @@ class RenderStyles extends _HasColor {
         if (lineCap && currentStyles[4] !== lineCap) currentStyles[4] = ctx.lineCap = lineCap
     }
 
+    
+    [Symbol.toPrimitive]() {
+        return this.toString()
+    }
 
+    *[Symbol.iterator]() {
+        const styles = this.getStyles(), s_ll = styles.length
+        for (let i=0;i<s_ll;i++) yield styles[i]
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "RenderStyles"}
     get id() {return this.id}
 	get render() {return this._render}
 	get lineWidth() {return this._lineWidth}
@@ -3403,9 +3585,9 @@ class Canvas {
      * @param {HTMLCanvasElement | OffscreenCanvas} cvs: the html canvas element or an OffscreenCanvas instance to link to
      * @param {Function?} loopingCB: a function called along with the loop() function. (deltatime)=>{...}
      * @param {Number?} fpsLimit: the maximal frames per second cap. Defaults to V-Sync
-     * @param {HTMLElement?} cvsFrame: if defined and if "cvs" is an HTML canvas, sets this element as the parent of the canvas element
+     * @param {HTMLElement?} cvsFrame: if defined and if "cvs" is an HTML canvas, sets this element as the reference parent of the canvas element
      * @param {Object?} settings: an object containing the canvas settings
-     * @param {Boolean} willReadFrequently: whether the getImageData optimizations are enabled
+     * @param {Boolean?} willReadFrequently: whether the getImageData optimizations are enabled
      */
     constructor(cvs, loopingCB, fpsLimit=null, cvsFrame, settings=Canvas.DEFAULT_CTX_SETTINGS, willReadFrequently=false) {
         this._id = Canvas.CANVAS_ID_GIVER++                               // Canvas instance id
@@ -3422,7 +3604,7 @@ class Canvas {
             Canvas.#DOM_CANVAS_INTERSECTION_OBSERVER.observe(this._cvs)
             Canvas.#DOM_CANVAS_LINKS.set(this._cvs, this)
         }
-        this._ctx = this._cvs.getContext("2d", {willReadFrequently})  // canvas context
+        this._ctx = this._cvs.getContext("2d", {willReadFrequently:willReadFrequently??false})// canvas context
         this._settings = this.updateSettings(settings||Canvas.DEFAULT_CTX_SETTINGS)// set context settings
         this._els = {refs:[], defs:[]}                                // arrs of objects to .draw() | refs (source): [Object that contains drawable obj], defs: [regular drawable objects]
         this._state = 0                                               // canvas drawing loop state. 0:off, 1:on, 2:awaiting stop
@@ -3445,6 +3627,22 @@ class Canvas {
         this._render = new Render(this._ctx)                           // render instance
         this._anims = []                                               // current animations
         this._mouseMoveThrottlingDelay = Canvas.DEFAULT_MOUSE_MOVE_THROTTLE_DELAY// mouse move throttling delay
+    }
+
+    /**
+     * Creates and instantiates a canvas in the specified targetElement
+     * @param {HTMLElement?} targetElement: the html element to create the canvas in
+     * @param {Function?} loopingCB: a function called along with the loop() function. (deltatime)=>{...}
+     * @param {Number?} fpsLimit: the maximal frames per second cap. Defaults to V-Sync
+     * @param {HTMLElement?} cvsFrame: if defined, sets this element as the reference parent of the canvas element
+     * @param {Object?} settings: an object containing the canvas settings
+     * @param {Boolean?} willReadFrequently: whether the getImageData optimizations are enabled
+     * @returns the created Canvas instance
+     */
+    static create(targetElement=null, loopingCB, fpsLimit=null, cvsFrame, settings=Canvas.DEFAULT_CTX_SETTINGS, willReadFrequently=false) {
+        const canvasEl = document.createElement("canvas")
+        ;(targetElement||document.documentElement).appendChild(canvasEl)
+        return new Canvas(canvasEl, loopingCB, fpsLimit, cvsFrame, settings, willReadFrequently)
     }
 
     // sets css styles on the canvas and the parent
@@ -4238,7 +4436,18 @@ class Canvas {
     enableDefaultViewportIntersectionOptimizations() {
         this.onIntersectionChangeCB = null
     }
-    
+
+    [Symbol.toPrimitive]() {
+        return this.id
+    }
+
+    *[Symbol.iterator]() {
+        const els = this.allEls, e_ll = els.length
+        for (let i=0;i<e_ll;i++) yield els[i]
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "Canvas"}
 	get id() {return this._id}
 	get cvs() {return this._cvs}
 	get frame() {return this._frame}
@@ -4364,9 +4573,7 @@ class Anim {
     getFrame(time, deltaTime) {
         const isInfinite = this._duration<0, duration = isInfinite?-this._duration:this._duration, startTime = this._startTime, reversed = this._isReversed
         if (!this._playCount || isInfinite) {
-            // SET START TIME
             if (!startTime) this._startTime = time
-            // PLAY ANIMATION
             else if (deltaTime >= 0 && time < startTime+duration) {
                 let elapsed = time-startTime, prog = this._easing((Math.abs(elapsed))/duration)
                 this._progress = reversed ? 1-prog : prog
@@ -4390,7 +4597,6 @@ class Anim {
                     this._animation(this._progress, this._playCount, deltaTime, this.progress)
                 }
             }
-            // REPEAT IF NEGATIVE DURATION
             else if (isInfinite) {
                 if (!this._isReversed) this.reset(true, deltaTime)
                 else {
@@ -4398,7 +4604,6 @@ class Anim {
                     this._playCount++
                 }
             }
-            // END
             else this.end(deltaTime)
         }
     }
@@ -4417,6 +4622,12 @@ class Anim {
         this._startTime = null
     }
 
+    [Symbol.toPrimitive]() {
+        return this.id
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "Anim"}
     get id() {return this._id}
     get animation() {return this._animation}
 	get duration() {return this._duration}
@@ -4880,6 +5091,8 @@ class _BaseObj extends _HasColor {
         }
     }
 
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "_BaseObj"}
 	get id() {return this._id}
     get x() {return this._pos[0]}
     get y() {return this._pos[1]}
@@ -5610,6 +5823,17 @@ class AudioDisplay extends _BaseObj {
         }
     }
 
+    [Symbol.toPrimitive]() {
+        return this.id
+    }
+
+    *[Symbol.iterator]() {
+        const data = this.#data, d_ll = data.length
+        for (let i=0;i<d_ll;i++) yield data[i]
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "AudioDisplay"}
     get source() {return this._source}
 	get binCB() {return this._binCB}
 	get sampleCount() {return this._sampleCount}
@@ -5630,7 +5854,6 @@ class AudioDisplay extends _BaseObj {
     get bufferLength() {return this.#buffer_ll}
     get transformableRaw() {return this._transformable}
     get transformable() {return Boolean(this._transformable)}
-    get instanceOf() {return "AudioDisplay"}
 
     get video() {return this._source}
     get image() {return this._source}
@@ -6107,6 +6330,12 @@ class ImageDisplay extends _BaseObj {
         return "."+ImageDisplay.SUPPORTED_IMAGE_FORMATS.join(sep)+sep+ImageDisplay.SUPPORTED_VIDEO_FORMATS.join(sep)
     }
 
+    [Symbol.toPrimitive]() {
+        return this.id
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "ImageDisplay"}
 	get ctx() {return this._parent._ctx}
 	get size() {return this._size||[0,0]}
 	get size_() {return this._size?CDEUtils.unlinkArr2(this._size):[0,0]}
@@ -6123,7 +6352,6 @@ class ImageDisplay extends _BaseObj {
     get source() {return this._source}
 	get sourceCroppingPositions() {return this._sourceCroppingPositions}
     get errorCB() {return this._errorCB}
-    get instanceOf() {return "ImageDisplay"}
 
     get paused() {return this._source?.paused}
     get playbackRate() {return this._source?.playbackRate}
@@ -6414,6 +6642,17 @@ class TextDisplay extends _BaseObj {
         TextStyles.loadCustomFont(src, fontFaceName, fontFaceDescriptors, readyCB, errorCB)
     }
 
+    [Symbol.toPrimitive]() {
+        return this.id
+    }
+
+    *[Symbol.iterator]() {
+        const text = this.getTextValue(), t_ll = text.length
+        for (let i=0;i<t_ll;i++) yield text[i]
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "TextDisplay"}
     get ctx() {return this._parent.ctx}
     get render() {return this._parent.render}
 	get text() {return this._text+""}
@@ -6427,7 +6666,6 @@ class TextDisplay extends _BaseObj {
     get lineCount() {return this.#lineCount}
     get width() {return this.trueSize[0]}
     get height() {return this.trueSize[1]}
-    get instanceOf() {return "TextDisplay"}
 
 	set text(text) {
         const lastYScale = this._scale[1]
@@ -6469,6 +6707,8 @@ class _DynamicColor {
         this._value = null              // usable value as a fill/stroke style
     }
 
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "_DynamicColor"}
     get initPositions() {return this._initPositions}
     get positions() {return this._positions}
 	get rotation() {return this._rotation}
@@ -6719,6 +6959,13 @@ class Pattern extends _DynamicColor {
         return ImageDisplay.loadCapture(resolution, cursor, frameRate, mediaSource)
     }
 
+    
+    [Symbol.toPrimitive]() {
+        return this.value
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "Pattern"}
     get id() {return this._id}
 	get render() {return this._render}
 	get source() {return this._source}
@@ -6865,6 +7112,8 @@ class _Obj extends _BaseObj {
         return super.getBounds(positions, padding, rotation, scale, centerPos)
     }
 
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "_Obj"}
     get radius() {return this._radius}
     get initRadius() {return this._initRadius}
 
@@ -7057,6 +7306,21 @@ class Shape extends _Obj {
             const dot = this._dots[i]
             if (onlyReplaceDefaults && !dot.visualEffect) dot.visualEffects = visualEffects
             else if (!onlyReplaceDefaults) dot.visualEffects = visualEffects
+        }
+    }
+
+    /**
+     * Updates the activationMargin of all the shape's dots
+     * @param {Number | Boolean ?} activationMargin: the pixel margin amount from where the object remains active when outside the canvas visual bounds. If "true", the object will always remain active.
+     * @param {Boolean?} onlyReplaceDefaults: is true, it only sets the dots' activationMargin if it was not initialy set
+     */
+    setActivationMargin(activationMargin=this._activationMargin, onlyReplaceDefaults) {
+        this._activationMargin = activationMargin
+        const d_ll = this._dots.length
+        for (let i=0;i<d_ll;i++) {
+            const dot = this._dots[i]
+            if (onlyReplaceDefaults && dot.activationMargin===_BaseObj.DEFAULT_ACTIVATION_MARGIN) dot.activationMargin = activationMargin
+            else if (!onlyReplaceDefaults) dot.activationMargin = activationMargin
         }
     }
 
@@ -7304,6 +7568,17 @@ class Shape extends _Obj {
         return this.initialized ? shape : null
     }
 
+    [Symbol.toPrimitive]() {
+        return this.id
+    }
+
+    *[Symbol.iterator]() {
+        const dots = this._dots, d_ll = dots.length
+        for (let i=0;i<d_ll;i++) yield dots[i]
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "Shape"}
     get cvs() {return this._parent}
     get ctx() {return this.cvs.ctx}
     get render() {return this.cvs.render}
@@ -7324,7 +7599,6 @@ class Shape extends _Obj {
     get thirdDot() {return this._dots[2]}
     get lastDot() {return CDEUtils.getLast(this._dots, 0)}
     get asSource() {return this._dots}
-    get instanceOf() {return "Shape"}
 
     set dots(ratioPos) {this._ratioPos = ratioPos}
     set ratioPos(ratioPos) {this._ratioPos = ratioPos}
@@ -7362,7 +7636,7 @@ class Gradient extends _DynamicColor {
         ) 
         this._ctx = ctx.ctx??ctx                 // canvas context
         this._type = type||Gradient.DEFAULT_TYPE // type of gradient
-        this._colorStops = colorStops.map(([stop, color])=>[stop, Color.adjust(color)]) // ex: [[0..1, Color], [0.5, Color], [1, Color]]
+        this._colorStops = colorStops.map(([stop, color])=>[stop, Color.uniquify(color)]) // ex: [[0..1, Color], [0.5, Color], [1, Color]]
         this.update()
     }
 
@@ -7486,13 +7760,24 @@ class Gradient extends _DynamicColor {
         
         return Gradient.getCanvasGradient(ctx, positions, colorStops, type, +rotation)
     }
+    
+    [Symbol.toPrimitive]() {
+        return this.toString()
+    }
 
+    *[Symbol.iterator]() {
+        const colorStops = this._colorStops, c_ll = colorStops.length
+        for (let i=0;i<c_ll;i++) yield colorStops[i]
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "Gradient"}
     get ctx() {return this._ctx}
     get type() {return this._type}
 	get colorStops() {return this._colorStops}
 
 	set colorStops(_colorStops) {
-        this._colorStops = _colorStops.map(([stop, color])=>[stop, Color.adjust(color)])
+        this._colorStops = _colorStops.map(([stop, color])=>[stop, Color.uniquify(color)])
         if (!this.isDynamic) this.update()
     }
     set type(type) {
@@ -7599,14 +7884,18 @@ class FilledShape extends Shape {
         return this.initialized ? filledShape : null
     }
 
+    [Symbol.toPrimitive]() {
+        return this.id
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "FilledShape"}
     get fillColorObject() {return this._fillColor}
     get fillColorRaw() {return this._fillColor.colorRaw}
     get fillColor() {return this._fillColor.color}
     get initFillColor() {return this._initFillColor}
 	get path() {return this._path}
 	get dynamicUpdates() {return this._dynamicUpdates}
-    get instanceOf() {return "FilledShape"}
-
 
     set fillColor(fillColor) {
         const fc = this._fillColor
@@ -7620,7 +7909,7 @@ class FilledShape extends Shape {
 
             
             if (fc instanceof Color) fc.color = fillColor
-            else this._fillColor = Color.adjust(fillColor)
+            else this._fillColor = Color.uniquify(fillColor)
         }
     }
 	set dynamicUpdates(_dynamicUpdates) {return this._dynamicUpdates = _dynamicUpdates}
@@ -7790,11 +8079,16 @@ class Grid extends Shape {
         return this.initialized ? grid : null
     }
 
+    [Symbol.toPrimitive]() {
+        return this.id
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "Grid"}
     get keys() {return this._keys}
 	get gaps() {return this._gaps}
 	get spacing() {return this._spacing}
 	get source() {return this._source}
-    get instanceOf() {return "Grid"}
 
 	set keys(keys) {
         const n_ll = keys.length>this._keys.length?keys.length:this._keys.length, newKeys = new Array(n_ll)
@@ -8056,6 +8350,17 @@ class Dot extends _Obj {
         return super.getBounds(positions, padding, (scale[0]!=scale[1]&&(scale[0]!=1||scale[1]!=1))?rotation:0, scale, super.getCenter(positions))
     }
 
+    [Symbol.toPrimitive]() {
+        return this.id
+    }
+
+    *[Symbol.iterator]() {
+        const connections = this._connections, c_ll = connections.length
+        for (let i=0;i<c_ll;i++) yield connections[i]
+    }
+
+    get [Symbol.toStringTag]() {return this.instanceOf}
+    get instanceOf() {return "Dot"}
     get ctx() {return this.cvs.ctx}
     get cvs() {return this._parent.parent||this._parent}
     get render() {return this.cvs.render}
@@ -8079,7 +8384,6 @@ class Dot extends _Obj {
     get relativePos() {return super.relativePos}
     get radius() {return this._radius}
     get cachedPath() {return this._cachedPath}
-    get instanceOf() {return "Dot"}
 
     set x(x) {
         x = CDEUtils.round(x, _BaseObj.POSITION_PRECISION)

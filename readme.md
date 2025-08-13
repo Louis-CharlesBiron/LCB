@@ -1,1 +1,1 @@
-## Hi, this is a work in progress of my portfolio / personnal web page!
+## Hi, this is pretty much my portfolio / personnal web page!
