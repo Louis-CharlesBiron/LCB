@@ -34,12 +34,12 @@ startCDEPreview.onpointerup=()=>{
 
         setTimeout(()=>startCDEPreview.remove(),1000)
 
-        CDEUtils.noTimeoutInterval(()=>{
-            CVS_cdePreview.fpsLimit = null
-            CVS_cdePreview_fpsCounter.runRecommendedFPSEvaluation((results)=>{
-                CVS_cdePreview.fpsLimit = Math.max(60, results.recommendedValue)
-            }, 5000, 5, false)
-        }, 20000)
+        //CDEUtils.noTimeoutInterval(()=>{
+        //    CVS_cdePreview.fpsLimit = null
+        //    CVS_cdePreview_fpsCounter.runRecommendedFPSEvaluation((results)=>{
+        //        CVS_cdePreview.fpsLimit = Math.max(60, results.recommendedValue)
+        //    }, 5000, 5, false)
+        //}, 20000)
 
         generateCDEPreview()
         CDEPreviewStart()
